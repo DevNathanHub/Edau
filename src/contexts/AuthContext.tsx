@@ -116,10 +116,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         return { error: result.error };
       }
-      const topLevel: any = result.data || {};
-      const inner = topLevel.data || {};
-      const token = inner.token;
-      const userData = inner.user;
+      const responseData = result.data || {};
+      const token = responseData.token;
+      const userData = responseData.user;
       if (userData && token) {
         setUser(userData);
         setSession({ token });
@@ -161,10 +160,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       // Auto-login after successful registration
       if (result.data) {
-        const topLevel: any = result.data || {};
-        const inner = topLevel.data || {};
-        const token = inner.token;
-        const newUser = inner.user;
+        const responseData = result.data || {};
+        const token = responseData.token;
+        const newUser = responseData.user;
         if (!newUser || !token) {
           return { error: { message: 'Malformed signup response' } };
         }

@@ -126,7 +126,7 @@ const ProductDetail = () => {
 
     // Direct message to admin number for ordering
     const adminNumber = "254727690165"; // Admin WhatsApp number
-    const orderMessage = `Hello! I would like to order:\n\n🐝 *${product.name}*\n� Category: ${categoryNames[category] || "Farm Products"}\n� Price: KSh ${product.price.toLocaleString()}\n📦 Quantity: ${quantity}\n� Total: KSh ${(product.price * quantity).toLocaleString()}\n\nPlease confirm availability and delivery details. Thank you!`;
+    const orderMessage = `Hello! I would like to order:\n\n🐝 *${product.name}*\n📂 Category: ${categoryNames[category] || "Farm Products"}\n💰 Price: KSh ${product.price.toLocaleString()}\n📦 Quantity: ${quantity}\n💵 Total: KSh ${(product.price * quantity).toLocaleString()}\n\nPlease confirm availability and delivery details. Thank you!`;
 
     // Encode message for URL
     const encodedMessage = encodeURIComponent(orderMessage);
@@ -135,10 +135,37 @@ const ProductDetail = () => {
     window.open(`https://wa.me/${adminNumber}?text=${encodedMessage}`, '_blank');
   };
 
-  // Get similar products (same category, different product)
-  const similarProducts = allProducts
-    .filter(p => p.id !== product?.id && p.category === product?.category)
-    .slice(0, 4);
+  const handleShare = async () => {
+    if (!product) return;
+
+    const productUrl = `${window.location.origin}/products/${product.id}`;
+
+    // Check if Web Share API is supported
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${product.name} - Edau Farm`,
+          text: `Check out this product from Edau Farm: ${product.name}`,
+          url: productUrl,
+        });
+      } catch (error) {
+        // User cancelled sharing or error occurred, fallback to clipboard
+        console.log('Error sharing:', error);
+        await navigator.clipboard.writeText(productUrl);
+        toast({
+          title: "Link copied!",
+          description: "Product link has been copied to your clipboard.",
+        });
+      }
+    } else {
+      // Fallback for browsers that don't support Web Share API
+      await navigator.clipboard.writeText(productUrl);
+      toast({
+        title: "Link copied!",
+        description: "Product link has been copied to your clipboard.",
+      });
+    }
+  };
 
   // Get recommended products (different category, similar price range)
   const recommendedProducts = allProducts

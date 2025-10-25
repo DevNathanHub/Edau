@@ -167,6 +167,11 @@ const ProductDetail = () => {
     }
   };
 
+  // Get similar products (same category, different product)
+  const similarProducts = allProducts
+    .filter(p => p.id !== product?.id && p.category === product?.category)
+    .slice(0, 4);
+
   // Get recommended products (different category, similar price range)
   const recommendedProducts = allProducts
     .filter(p => {

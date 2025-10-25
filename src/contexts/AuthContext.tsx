@@ -116,7 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         return { error: result.error };
       }
-      const responseData = result.data || {};
+      const responseData: any = result.data || {};
       const token = responseData.token;
       const userData = responseData.user;
       if (userData && token) {
@@ -160,7 +160,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       // Auto-login after successful registration
       if (result.data) {
-        const responseData = result.data || {};
+        const responseData: any = result.data || {};
         const token = responseData.token;
         const newUser = responseData.user;
         if (!newUser || !token) {

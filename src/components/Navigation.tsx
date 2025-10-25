@@ -35,23 +35,23 @@ const Navigation = () => {
       <div className="container mx-auto flex justify-between items-center px-4">
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
-            <Leaf className="h-6 w-6 text-green-600 mr-2" />
-            <span className="text-xl font-semibold text-gray-800">Edau Farm</span>
+            <Leaf className="h-5 w-5 text-green-600 mr-2" />
+            <span className="text-lg font-semibold text-gray-800">Edau Farm</span>
           </Link>
         </div>
         
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-6">
-          <Link to="/products" className="text-gray-600 hover:text-green-600 transition-colors">Products</Link>
-          <button onClick={() => handleNavigation("features")} className="text-gray-600 hover:text-green-600 transition-colors">Features</button>
-          <button onClick={() => handleNavigation("about")} className="text-gray-600 hover:text-green-600 transition-colors">Our Story</button>
-          <Link to="/farm-visit" className="text-gray-600 hover:text-green-600 transition-colors">Farm Visit</Link>
-          <button onClick={() => handleNavigation("contact")} className="text-gray-600 hover:text-green-600 transition-colors">Contact</button>
+        <div className="hidden md:flex items-center space-x-4">
+          <Link to="/products" className="text-sm text-gray-600 hover:text-green-600 transition-colors">Products</Link>
+          <button onClick={() => handleNavigation("features")} className="text-sm text-gray-600 hover:text-green-600 transition-colors">Features</button>
+          <Link to="/farm-visit" className="text-sm text-gray-600 hover:text-green-600 transition-colors">Farm Visit</Link>
+          <button onClick={() => handleNavigation("contact")} className="text-sm text-gray-600 hover:text-green-600 transition-colors">Contact</button>
           {user && user.email ? (
             <>
-              <Link to="/dashboard" className="text-gray-600 hover:text-green-600 transition-colors">Dashboard</Link>
+              <Link to="/dashboard" className="text-sm text-gray-600 hover:text-green-600 transition-colors">Dashboard</Link>
               <Button
                 variant="outline"
+                size="sm"
                 className="ml-2 border-green-600 text-green-600 hover:bg-green-50"
                 onClick={async () => {
                   await signOut();
@@ -63,13 +63,13 @@ const Navigation = () => {
               </Button>
             </>
           ) : (
-            <Link to="/login" className="text-gray-600 hover:text-green-600 transition-colors">Login</Link>
+            <Link to="/login" className="text-sm text-gray-600 hover:text-green-600 transition-colors">Login</Link>
           )}
           <Cart isIconButton />
           <Link to="/products">
-            <Button className="bg-green-600 hover:bg-green-700 flex items-center">
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              Shop Now
+            <Button size="sm" className="bg-green-600 hover:bg-green-700 flex items-center">
+              <ShoppingCart className="mr-1 h-3 w-3" />
+              Shop
             </Button>
           </Link>
         </div>
@@ -107,12 +107,6 @@ const Navigation = () => {
             >
               Features
             </button>
-            <button 
-              onClick={() => handleNavigation("about")}
-              className="text-gray-600 hover:text-green-600 py-2 text-left"
-            >
-              Our Story
-            </button>
             <Link 
               to="/farm-visit" 
               className="text-gray-600 hover:text-green-600 py-2"
@@ -137,6 +131,7 @@ const Navigation = () => {
                 </Link>
                 <Button
                   variant="outline"
+                  size="sm"
                   className="mt-2 border-green-600 text-green-600 hover:bg-green-50 w-full"
                   onClick={async () => {
                     setMobileMenuOpen(false);
@@ -162,6 +157,7 @@ const Navigation = () => {
               onClick={() => setMobileMenuOpen(false)}
             >
               <Button 
+                size="sm"
                 className="bg-green-600 hover:bg-green-700 flex items-center justify-center"
               >
                 <ShoppingCart className="mr-2 h-4 w-4" />

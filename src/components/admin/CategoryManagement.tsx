@@ -19,23 +19,51 @@ const CategoryManagement: React.FC = () => {
   const fetchCategories = async () => {
     setLoading(true);
     setError("");
-    const res = await apiService.getCategories?.();
-    if (res?.error) setError(res.error);
-    setCategories((res?.data as any) || []);
-    setLoading(false);
+    try {
+      const res = await apiService.getCategories() as { data?: any; error?: string };
+      console.log('CategoryManagement: Categories API response:', res);
+      
+      // Handle different response structures
+      let categoriesArr = [];
+      if (res.data && Array.isArray(res.data)) {
+        categoriesArr = res.data;
+      } else if (res.data && res.data.data && Array.isArray(res.data.data)) {
+        categoriesArr = res.data.data;
+      } else if (res.data && typeof res.data === 'object' && res.data.data) {
+        categoriesArr = Array.isArray(res.data.data) ? res.data.data : [];
+      }
+      
+      console.log('CategoryManagement: Categories array:', categoriesArr);
+      setCategories(Array.isArray(categoriesArr) ? categoriesArr : []);
+    } catch (error) {
+      console.error('CategoryManagement: Error fetching categories:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch categories');
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAddCategory = async () => {
     if (!newCategory.trim()) return;
     setLoading(true);
     setError("");
-    const res = await apiService.createCategory?.({ name: newCategory.trim() });
-    if (res?.error) setError(res.error);
-    else {
-      setNewCategory("");
-      await fetchCategories();
+    try {
+      const res = await apiService.createCategory({ name: newCategory.trim() });
+      console.log('CategoryManagement: Create category response:', res);
+      
+      if (res.error) {
+        setError(res.error);
+      } else {
+        setNewCategory("");
+        await fetchCategories();
+      }
+    } catch (error) {
+      console.error('CategoryManagement: Error creating category:', error);
+      setError(error instanceof Error ? error.message : 'Failed to create category');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDeleteCategory = async (categoryName: string) => {

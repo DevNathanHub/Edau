@@ -35,7 +35,7 @@ const ProductManagement: React.FC = () => {
     setLoading(true);
     setError("");
     try {
-      const res = await apiService.getProducts();
+      const res = await apiService.getProducts() as { data?: any; error?: string };
       
       if (res.error) {
         setError(res.error);
@@ -44,11 +44,20 @@ const ProductManagement: React.FC = () => {
         return;
       }
       
-      const productsArr = (res.data && (res.data as any).data) || [];
+      // Handle different response structures
+      let productsArr = [];
+      if (res.data && Array.isArray(res.data)) {
+        productsArr = res.data;
+      } else if (res.data && res.data.data && Array.isArray(res.data.data)) {
+        productsArr = res.data.data;
+      } else if (res.data && typeof res.data === 'object' && res.data.data) {
+        productsArr = Array.isArray(res.data.data) ? res.data.data : [];
+      }
       
       // Ensure we have an array and log for debugging
       const safeProductsArr = Array.isArray(productsArr) ? productsArr : [];
       console.log('Admin ProductManagement: Fetched products:', safeProductsArr.length, 'items');
+      console.log('Admin ProductManagement: Raw response:', res);
       
       setProducts(safeProductsArr as Product[]);
       setFilteredProducts(safeProductsArr as Product[]);
@@ -70,7 +79,7 @@ const ProductManagement: React.FC = () => {
   const fetchCategories = async () => {
     try {
       console.log('ProductManagement: Fetching categories');
-      const res = await apiService.getCategories();
+      const res = await apiService.getCategories() as { data?: any; error?: string };
       console.log('ProductManagement: Categories API response:', res);
       const categoriesArr = (res.data as any)?.data || [];
       console.log('ProductManagement: Categories array:', categoriesArr);

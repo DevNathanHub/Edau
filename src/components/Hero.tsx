@@ -2,8 +2,26 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Leaf, User, MessageCircle, Zap, ShoppingCart, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const Hero = () => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const heroImages = [
+    "https://res.cloudinary.com/dt05sixza/image/upload/v1761432130/edau_gallery/l391lo21ecais2upig2k.jpg",
+    "https://res.cloudinary.com/dt05sixza/image/upload/v1761431588/edau_gallery/dfhnrsmuteqhheghiema.jpg",
+    "https://res.cloudinary.com/dt05sixza/image/upload/v1761432064/edau_gallery/gzmlkw1evm17yrynuphm.jpg",
+    "https://res.cloudinary.com/dt05sixza/image/upload/v1761432109/edau_gallery/tb0utizepynaszqajuu6.jpg"
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+    }, 4000); // Change image every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
+
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -112,16 +130,39 @@ const Hero = () => {
             </div>
           </div>
           <div className="md:w-1/2">
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="aspect-video bg-gradient-to-br from-[#81C784] to-[#FFC107] relative flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="text-6xl mb-4">🌾</div>
-                  <h3 className="text-xl font-semibold mb-2">West Pokot Farm Landscape</h3>
-                  <p className="text-sm">Home of premium Acacia honey</p>
+            <div className="relative w-full h-full overflow-hidden">
+              {/* Sliding Images */}
+              {heroImages.map((image, index) => (
+                <div
+                  key={index}
+                  className={`absolute inset-0 transition-opacity duration-1000 ${
+                    index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <img
+                    src={image}
+                    alt={`Edau Farm - Image ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <div className="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg">
-                  <p className="text-sm font-medium text-gray-800">Sustainable farming in West Pokot since 2015</p>
-                </div>
+              ))}
+
+              {/* Image Indicators */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                {heroImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Overlay Text */}
+              <div className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-sm px-4 py-2 rounded-lg">
+                <p className="text-sm font-medium text-white">Sustainable farming in West Pokot since 2015</p>
               </div>
             </div>
           </div>

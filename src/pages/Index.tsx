@@ -6,11 +6,35 @@ import AIChatSection from "../components/AIChatSection";
 import Contact from "../components/Contact";
 import Footer from "../components/Footer";
 import { Button } from "@/components/ui/button";
-import { HeartHandshake, Calendar, Users, Star, Award, Truck, Shield, CheckCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { HeartHandshake, Calendar, Users, Star, Award, Truck, Shield, CheckCircle, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useState } from "react";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [buttonStates, setButtonStates] = useState({
+    shopNow: false,
+    orderNow: false,
+    bookVisit: false,
+    viewGallery: false,
+    meetTeam: false
+  });
+
+  const handleButtonClick = async (buttonType: keyof typeof buttonStates, action: () => void | Promise<void>, delay = 800) => {
+    setButtonStates(prev => ({ ...prev, [buttonType]: true }));
+    
+    try {
+      await action();
+      // Add a small delay to show the loading state
+      setTimeout(() => {
+        setButtonStates(prev => ({ ...prev, [buttonType]: false }));
+      }, delay);
+    } catch (error) {
+      setButtonStates(prev => ({ ...prev, [buttonType]: false }));
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
@@ -92,9 +116,20 @@ const Index = () => {
                 <p className="text-gray-600 mb-6">Get 15% off your first purchase with code WELCOME15</p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold text-[#4CAF50]">Valid until Dec 31</span>
-                  <Link to="/products">
-                    <Button className="bg-[#4CAF50] hover:bg-[#388E3C]">Shop Now</Button>
-                  </Link>
+                  <Button 
+                    className="bg-[#4CAF50] hover:bg-[#388E3C]" 
+                    disabled={buttonStates.shopNow}
+                    onClick={() => handleButtonClick('shopNow', () => navigate('/products'))}
+                  >
+                    {buttonStates.shopNow ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      'Shop Now'
+                    )}
+                  </Button>
                 </div>
               </div>
 
@@ -106,9 +141,20 @@ const Index = () => {
                 <p className="text-gray-600 mb-6">Free delivery on orders over KSh 3,000 within Nairobi</p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold text-[#4CAF50]">Always Available</span>
-                  <Link to="/products">
-                    <Button className="bg-[#4CAF50] hover:bg-[#388E3C]">Order Now</Button>
-                  </Link>
+                  <Button 
+                    className="bg-[#4CAF50] hover:bg-[#388E3C]" 
+                    disabled={buttonStates.orderNow}
+                    onClick={() => handleButtonClick('orderNow', () => navigate('/products'))}
+                  >
+                    {buttonStates.orderNow ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      'Order Now'
+                    )}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -218,37 +264,59 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-              {/* Placeholder for Farm Images/GIFs */}
-              <div className="aspect-square bg-gray-200 rounded-xl flex items-center justify-center shadow-md">
-                <div className="text-center text-gray-500">
-                  <div className="text-4xl mb-2">🐝</div>
-                  <p className="font-medium">Bee Keeping</p>
-                  <p className="text-sm">GIF/Image Placeholder</p>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {/* Farm Images */}
+              <div className="aspect-square rounded-xl overflow-hidden shadow-md">
+                <img 
+                  src="https://res.cloudinary.com/dt05sixza/image/upload/v1761432130/edau_gallery/l391lo21ecais2upig2k.jpg"
+                  alt="Edau Farm - Sustainable Farming"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                />
               </div>
 
-              <div className="aspect-square bg-gray-200 rounded-xl flex items-center justify-center shadow-md">
-                <div className="text-center text-gray-500">
-                  <div className="text-4xl mb-2">🐔</div>
-                  <p className="font-medium">Free-Range Poultry</p>
-                  <p className="text-sm">GIF/Image Placeholder</p>
-                </div>
+              <div className="aspect-square rounded-xl overflow-hidden shadow-md">
+                <img 
+                  src="https://res.cloudinary.com/dt05sixza/image/upload/v1761431588/edau_gallery/dfhnrsmuteqhheghiema.jpg"
+                  alt="Edau Farm - Fresh Produce"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                />
               </div>
 
-              <div className="aspect-square bg-gray-200 rounded-xl flex items-center justify-center shadow-md">
-                <div className="text-center text-gray-500">
-                  <div className="text-4xl mb-2">🍎</div>
-                  <p className="font-medium">Fruit Harvest</p>
-                  <p className="text-sm">GIF/Image Placeholder</p>
-                </div>
+              <div className="aspect-square rounded-xl overflow-hidden shadow-md">
+                <img 
+                  src="https://res.cloudinary.com/dt05sixza/image/upload/v1761432064/edau_gallery/gzmlkw1evm17yrynuphm.jpg"
+                  alt="Edau Farm - Animal Husbandry"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                />
               </div>
 
-              <div className="aspect-square bg-gray-200 rounded-xl flex items-center justify-center shadow-md">
-                <div className="text-center text-gray-500">
-                  <div className="text-4xl mb-2">🐑</div>
-                  <p className="font-medium">Dorper Sheep</p>
-                  <p className="text-sm">GIF/Image Placeholder</p>
+              <div className="aspect-square rounded-xl overflow-hidden shadow-md">
+                <img 
+                  src="https://res.cloudinary.com/dt05sixza/image/upload/v1761432109/edau_gallery/tb0utizepynaszqajuu6.jpg"
+                  alt="Edau Farm - Honey Production"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+
+              <div className="aspect-square rounded-xl overflow-hidden shadow-md">
+                <img 
+                  src="https://res.cloudinary.com/dt05sixza/image/upload/v1761432088/edau_gallery/q0iexqygkurq4b6xi2wt.jpg"
+                  alt="Edau Farm - Community Farming"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+
+              {/* Call to action card */}
+              <div className="aspect-square bg-gradient-to-br from-green-50 to-amber-50 rounded-xl flex flex-col items-center justify-center shadow-md border border-green-100">
+                <div className="text-center text-gray-700 p-6">
+                  <div className="text-4xl mb-4">🌱</div>
+                  <h3 className="text-xl font-semibold mb-2">Visit Our Farm</h3>
+                  <p className="text-sm mb-4">Experience sustainable farming firsthand</p>
+                  <Link to="/farm-visit">
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                      Book Visit
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -334,12 +402,12 @@ const Index = () => {
             
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="md:w-1/2">
-                <div className="bg-gradient-to-br from-green-50 to-amber-50 rounded-lg p-8 flex items-center justify-center min-h-[400px]">
-                  <div className="text-center text-gray-600">
-                    <div className="text-8xl mb-6">👨‍🌾</div>
-                    <h3 className="text-2xl font-semibold mb-3">Our Farming Story</h3>
-                    <p className="text-lg">Dedicated to sustainable agriculture</p>
-                  </div>
+                <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+                  <img 
+                    src="https://res.cloudinary.com/dt05sixza/image/upload/v1761431588/edau_gallery/dfhnrsmuteqhheghiema.jpg"
+                    alt="Edau Farm - Our Farming Story"
+                    className="w-full h-96 object-cover"
+                  />
                 </div>
               </div>
               

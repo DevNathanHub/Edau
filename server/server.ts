@@ -1,61 +1,29 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction, Application } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { MongoClient, Db, ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
+import slowDown from 'express-slow-down';
+import compression from 'compression';
+import helmet from 'helmet';
 import multer from 'multer';
 import cloudinary from './cloudinary';
+
+// Import our optimized services
+import { cacheService } from './cache.js';
+import { databaseService } from './database.js';
+import { logger, morganMiddleware, performanceMonitor, requestTimer } from './logger.js';
 
 // Load environment variables
 dotenv.config();
 
-// MongoDB connection
+// Configuration
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://chapinin777:CzvFbEsIpBeKaGDx@cluster0.hxakj.mongodb.net/edauDB';
 const JWT_SECRET = process.env.JWT_SECRET || 'your-default-secret-key-change-in-production';
 
-let db: Db | null = null;
-
-const connectToDatabase = async () => {
-  try {
-    const client = new MongoClient(MONGODB_URI);
-    await client.connect();
-    db = client.db('edauDB');
-
-    // Create indexes for better performance
-    await db.collection('farm_visits').createIndexes([
-      { key: { created_at: -1 } },
-      { key: { preferredDate: 1 } },
-      { key: { status: 1 } },
-      { key: { email: 1, preferredDate: 1 } },
-      { key: { name: 'text', email: 'text', phone: 'text' } }
-    ]);
-
-    await db.collection('products').createIndexes([
-      { key: { category: 1 } },
-      { key: { created_at: -1 } },
-      { key: { name: 'text', description: 'text' } }
-    ]);
-
-    await db.collection('chat_conversations').createIndexes([
-      { key: { user_id: 1, updated_at: -1 } },
-      { key: { created_at: -1 } },
-      { key: { token_count: 1 } }
-    ]);
-
-    await db.collection('feedback_replies').createIndexes([
-      { key: { feedback_id: 1, created_at: 1 } },
-      { key: { replied_by: 1 } }
-    ]);
-
-    console.log('✅ Connected to MongoDB with optimized indexes');
-    return db;
-  } catch (error) {
-    console.error('❌ MongoDB connection failed:', error);
-    throw error;
-  }
-};
+let db: any = null;
 
 // Auth utilities
 const hashPassword = async (password: string): Promise<string> => {
@@ -98,27 +66,6 @@ const adminOnly = (req: AuthedRequest, res: Response, next: NextFunction) => {
   return next();
 };
 
-const app = express();
-const PORT = process.env.PORT || 3001;
-
-// Middleware
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://edau.loopnet.tech', 'https://www.edau.loopnet.tech'] 
-    : ['http://localhost:5173', 'http://172.17.88.218', 'http://localhost:5174', 'http://localhost:8080', 'http://localhost:8081'],
-  credentials: true
-}));
-app.use(express.json());
-
-// Rate limiting for all API routes
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // limit each IP to 200 requests per windowMs
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-});
-app.use('/api', apiLimiter);
-
 // Helper to serialize MongoDB documents (convert _id to id)
 const serializeDoc = (doc: any) => {
   if (!doc) return doc;
@@ -128,49 +75,281 @@ const serializeDoc = (doc: any) => {
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Basic routes
-app.get('/api/health', (req: Request, res: Response) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'Backend server is running with MongoDB',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+const app: Application = express();
+const PORT = process.env.PORT || 3001;
+
+// Security middleware - applied first for performance
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "https://edau.loopnet.tech"],
+      scriptSrc: ["'self'"],
+      connectSrc: ["'self'", "https://generativelanguage.googleapis.com"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
+}));
+
+// Compression middleware - applied early to compress all responses
+app.use(compression() as any);
+
+// CORS configuration
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production'
+    ? ['https://edau.loopnet.tech', 'https://www.edau.loopnet.tech']
+    : ['http://localhost:5173', 'http://172.17.88.218', 'http://localhost:5174', 'http://localhost:8080', 'http://localhost:8081'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
+// Request timeout middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  // Set timeout for all requests (30 seconds)
+  req.setTimeout(30000, () => {
+    logger.warn('Request timeout', { url: req.url, method: req.method });
+    res.status(408).json({ error: 'Request timeout' });
   });
+  next();
 });
 
-// Products API
-app.get('/api/products', async (req: Request, res: Response) => {
-  try {
-    if (!db) throw new Error('Database not connected');
-    
-    const products = await db!.collection('products').find({}).toArray();
-    const data = products.map(serializeDoc);
-    res.json({ 
-      data,
-      total: products.length,
-      message: 'Products fetched successfully'
-    });
-  } catch (error) {
-    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+// Logging middleware
+app.use(morganMiddleware as any);
+
+// Performance monitoring
+app.use(requestTimer);
+
+// Body parsing middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Rate limiting - Global rate limit
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // limit each IP to 1000 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: 'Too many requests from this IP, please try again later.',
+    retryAfter: '15 minutes'
+  },
+  skip: (req) => {
+    // Skip rate limiting for health checks
+    return req.url === '/api/health';
   }
 });
 
-app.post('/api/products', async (req: Request, res: Response) => {
+// Speed limiting - Slow down repeated requests
+const speedLimiter = slowDown({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  delayAfter: 100, // allow 100 requests per 15 minutes without delay
+  delayMs: (used: number, req?: Request): number => {
+    return 500; // add 500ms of delay per request after delayAfter
+  },
+  validate: { delayMs: false } // Disable the warning
+});
+
+// API specific rate limits
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500, // limit each IP to 500 API requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: 'API rate limit exceeded',
+    retryAfter: '15 minutes'
+  }
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // limit each IP to 10 auth attempts per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: 'Too many authentication attempts, please try again later.',
+    retryAfter: '15 minutes'
+  }
+});
+
+// Apply rate limiting
+app.use(globalLimiter);
+app.use(speedLimiter);
+app.use('/api', apiLimiter);
+app.use('/api/auth', authLimiter);
+
+// Error handling middleware
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  logger.error('Unhandled error', {
+    error: err.message,
+    stack: err.stack,
+    url: req.url,
+    method: req.method,
+    ip: req.ip
+  });
+
+  res.status(500).json({
+    error: 'Something went wrong!',
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+  });
+});
+
+// Basic routes
+app.get('/api/health', async (req: Request, res: Response) => {
   try {
-    if (!db) throw new Error('Database not connected');
-    
+    const dbHealth = await databaseService.healthCheck();
+    const cacheHealth = cacheService ? { status: 'connected' } : { status: 'disconnected' };
+    const metrics = performanceMonitor.getMetrics();
+
+    res.set({
+      'Cache-Control': 'no-cache',
+      'X-Response-Time': `${Date.now() - (req as any).startTime}ms`
+    });
+
+    res.json({
+      status: dbHealth.status === 'healthy' ? 'OK' : 'DEGRADED',
+      message: 'Backend server is running with optimized services',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      services: {
+        database: dbHealth,
+        cache: cacheHealth,
+        performance: metrics
+      },
+      uptime: process.uptime()
+    });
+  } catch (error) {
+    logger.error('Health check failed', error);
+    res.status(503).json({
+      status: 'ERROR',
+      message: 'Health check failed',
+      timestamp: new Date().toISOString(),
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Performance metrics endpoint (admin only)
+app.get('/api/metrics', verifyToken, adminOnly, async (req: AuthedRequest, res: Response) => {
+  try {
+    const metrics = performanceMonitor.getMetrics();
+    const dbStats = await databaseService.healthCheck();
+
+    res.json({
+      performance: metrics,
+      database: dbStats,
+      cache: {
+        connected: cacheService ? true : false
+      },
+      memory: process.memoryUsage(),
+      uptime: process.uptime()
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch metrics' });
+  }
+});
+
+// Products API - Optimized with caching
+app.get('/api/products', async (req: Request, res: Response) => {
+  try {
+    const startTime = Date.now();
+    const { page = '1', limit = '20', category, search, minPrice, maxPrice, inStock, sort = 'created_at' } = req.query as any;
+
+    const cacheKey = `products:${JSON.stringify({ page, limit, category, search, minPrice, maxPrice, inStock, sort })}`;
+
+    // Try to get from cache first
+    let cachedResult = await cacheService.get(cacheKey);
+    if (cachedResult) {
+      logger.info('Products served from cache', { cacheKey, responseTime: Date.now() - startTime });
+      return res.set({
+        'X-Cache': 'HIT',
+        'Cache-Control': 'public, max-age=300'
+      }).json(cachedResult);
+    }
+
+    // Build filter
+    const filter: any = {};
+    if (category && category !== 'all') filter.category = category;
+    if (search) filter.search = search;
+    if (minPrice !== undefined) filter.minPrice = parseFloat(minPrice);
+    if (maxPrice !== undefined) filter.maxPrice = parseFloat(maxPrice);
+    if (inStock !== undefined) filter.inStock = inStock === 'true';
+
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    const skip = (pageNum - 1) * limitNum;
+
+    // Get products and count in parallel
+    const [products, total] = await Promise.all([
+      databaseService.getProducts(filter, {
+        skip,
+        limit: limitNum,
+        sort: sort === 'price_asc' ? { price: 1 } :
+              sort === 'price_desc' ? { price: -1 } :
+              sort === 'name' ? { name: 1 } : { created_at: -1 }
+      }),
+      databaseService.getProductsCount(filter)
+    ]);
+
+    const result = {
+      data: products.map(serializeDoc),
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum)
+      },
+      message: 'Products fetched successfully'
+    };
+
+    // Cache the result
+    await cacheService.set(cacheKey, result, (cacheService.constructor as any).ttls.products);
+
+    logger.info('Products fetched from database', {
+      count: products.length,
+      total,
+      responseTime: Date.now() - startTime
+    });
+
+    res.set({
+      'X-Cache': 'MISS',
+      'Cache-Control': 'public, max-age=300'
+    }).json(result);
+
+  } catch (error) {
+    logger.error('Products fetch error', error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.post('/api/products', verifyToken, adminOnly, async (req: AuthedRequest, res: Response) => {
+  try {
+    const db = databaseService.getDb();
     const product = req.body;
-    const result = await db!.collection('products').insertOne({
+    const result = await db.collection('products').insertOne({
       ...product,
       created_at: new Date(),
       updated_at: new Date()
     });
-    
-    res.json({ 
+
+    // Invalidate products cache
+    await cacheService.invalidatePattern('products:*');
+
+    res.json({
       data: { id: result.insertedId.toString(), ...product },
       message: 'Product created successfully'
     });
   } catch (error) {
+    logger.error('Product creation error', error);
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -178,7 +357,7 @@ app.post('/api/products', async (req: Request, res: Response) => {
 // Update product
 app.patch('/api/products/:id', verifyToken, adminOnly, async (req: AuthedRequest, res: Response) => {
   try {
-    if (!db) throw new Error('Database not connected');
+    const db = databaseService.getDb();
     const { id } = req.params;
     const updates = { ...req.body, updated_at: new Date() };
     let query: any;
@@ -187,10 +366,16 @@ app.patch('/api/products/:id', verifyToken, adminOnly, async (req: AuthedRequest
     } catch {
       query = { _id: id };
     }
-    const result = await db!.collection('products').findOneAndUpdate(query, { $set: updates }, { returnDocument: 'after' });
+    const result = await db.collection('products').findOneAndUpdate(query, { $set: updates }, { returnDocument: 'after' });
     if (!result || !result.value) return res.status(404).json({ error: 'Product not found' });
+
+    // Invalidate cache
+    await cacheService.invalidatePattern('products:*');
+    await cacheService.del(`product:${id}`);
+
     res.json({ data: serializeDoc(result.value), message: 'Product updated successfully' });
   } catch (error) {
+    logger.error('Product update error', error);
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -198,7 +383,7 @@ app.patch('/api/products/:id', verifyToken, adminOnly, async (req: AuthedRequest
 // Delete product
 app.delete('/api/products/:id', verifyToken, adminOnly, async (req: AuthedRequest, res: Response) => {
   try {
-    if (!db) throw new Error('Database not connected');
+    const db = databaseService.getDb();
     const { id } = req.params;
     let query: any;
     try {
@@ -206,32 +391,53 @@ app.delete('/api/products/:id', verifyToken, adminOnly, async (req: AuthedReques
     } catch {
       query = { _id: id };
     }
-    const result = await db!.collection('products').deleteOne(query);
+    const result = await db.collection('products').deleteOne(query);
     if (!result.deletedCount) return res.status(404).json({ error: 'Product not found' });
+
+    // Invalidate cache
+    await cacheService.invalidatePattern('products:*');
+    await cacheService.del(`product:${id}`);
+
     res.json({ data: { id }, message: 'Product deleted successfully' });
   } catch (error) {
+    logger.error('Product deletion error', error);
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
 
-// Get single product by id
+// Get single product by id - Optimized with caching
 app.get('/api/products/:id', async (req: Request, res: Response) => {
   try {
-    if (!db) throw new Error('Database not connected');
     const { id } = req.params;
-    let query: any;
-    try {
-      query = { _id: new ObjectId(id) };
-    } catch {
-      // If not a valid ObjectId, also try by string id field
-      query = { _id: id };
+    const cacheKey = `product:${id}`;
+
+    // Try cache first
+    let cachedProduct = await cacheService.get(cacheKey);
+    if (cachedProduct) {
+      return res.set({
+        'X-Cache': 'HIT',
+        'Cache-Control': 'public, max-age=600'
+      }).json(cachedProduct);
     }
-    const product = await db!.collection('products').findOne(query);
+
+    // Get from database
+    const product = await databaseService.getProductById(id);
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
-    res.json({ data: serializeDoc(product), message: 'Product fetched successfully' });
+
+    const result = { data: serializeDoc(product), message: 'Product fetched successfully' };
+
+    // Cache the result
+    await cacheService.set(cacheKey, result, (cacheService.constructor as any).ttls.product);
+
+    res.set({
+      'X-Cache': 'MISS',
+      'Cache-Control': 'public, max-age=600'
+    }).json(result);
+
   } catch (error) {
+    logger.error('Single product fetch error', error);
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -573,7 +779,7 @@ app.get('/api/feedback', async (req: Request, res: Response) => {
     const feedback = await db!.collection('user_feedback').find({}).sort({ created_at: -1 }).toArray();
 
     // Get all feedback replies
-    const feedbackIds = feedback.map(f => f._id.toString());
+    const feedbackIds = feedback.map((f: any) => f._id.toString());
     const replies = await db!.collection('feedback_replies').find({
       feedback_id: { $in: feedbackIds }
     }).sort({ created_at: 1 }).toArray();
@@ -587,7 +793,7 @@ app.get('/api/feedback', async (req: Request, res: Response) => {
     }, {});
 
     // Attach replies to feedback
-    const feedbackWithReplies = feedback.map(f => ({
+    const feedbackWithReplies = feedback.map((f: any) => ({
       ...serializeDoc(f),
       replies: repliesByFeedback[f._id.toString()] || []
     }));
@@ -712,7 +918,7 @@ app.get('/api/feedback/user/:userId', verifyToken, async (req: AuthedRequest, re
     const feedback = await db!.collection('user_feedback').find({ user_id: userId }).sort({ created_at: -1 }).toArray();
 
     // Get replies for this user's feedback
-    const feedbackIds = feedback.map(f => f._id.toString());
+    const feedbackIds = feedback.map((f: any) => f._id.toString());
     const replies = await db!.collection('feedback_replies').find({
       feedback_id: { $in: feedbackIds }
     }).sort({ created_at: 1 }).toArray();
@@ -726,7 +932,7 @@ app.get('/api/feedback/user/:userId', verifyToken, async (req: AuthedRequest, re
     }, {});
 
     // Attach replies to feedback
-    const feedbackWithReplies = feedback.map(f => ({
+    const feedbackWithReplies = feedback.map((f: any) => ({
       ...serializeDoc(f),
       replies: repliesByFeedback[f._id.toString()] || []
     }));
@@ -741,54 +947,47 @@ app.get('/api/feedback/user/:userId', verifyToken, async (req: AuthedRequest, re
   }
 });
 
-// Analytics API (admin only)
+// Analytics API (admin only) - Optimized with caching
 app.get('/api/analytics/dashboard', verifyToken, adminOnly, async (req: AuthedRequest, res: Response) => {
   try {
-    if (!db) throw new Error('Database not connected');
-    
-    // Get counts
-    const totalProducts = await db!.collection('products').countDocuments();
-    const activeOrders = await db!.collection('orders').countDocuments({ 
-      status: { $in: ['pending', 'processing', 'Pending', 'Confirmed'] } 
-    });
-    const totalOrders = await db!.collection('orders').countDocuments();
-    const totalCustomers = await db!.collection('users').countDocuments();
-    const newsletterSubscribers = await db!.collection('newsletter_subscribers').countDocuments();
-    
-    // Get low stock products (stock < 10)
-    const lowStockProducts = await db!.collection('products')
-      .find({ stock: { $lt: 10 } })
-      .project({ name: 1, stock: 1, category: 1 })
-      .toArray();
-    
-    // Get recent orders (last 5)
-    const recentOrders = await db!.collection('orders')
-      .find({})
-      .sort({ created_at: -1 })
-      .limit(5)
-      .toArray();
-    
-    // Calculate total revenue
-    const revenueResult = await db!.collection('orders').aggregate([
-      { $match: { status: { $in: ['delivered', 'Delivered'] } } },
-      { $group: { _id: null, total: { $sum: '$total_amount' } } }
-    ]).toArray();
-    const totalRevenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
-    
-    res.json({
+    const cacheKey = 'analytics:dashboard';
+
+    // Try cache first
+    let cachedAnalytics = await cacheService.get(cacheKey);
+    if (cachedAnalytics) {
+      return res.set({
+        'X-Cache': 'HIT',
+        'Cache-Control': 'private, max-age=300'
+      }).json(cachedAnalytics);
+    }
+
+    // Get analytics from optimized database service
+    const analytics = await databaseService.getDashboardAnalytics();
+
+    const result = {
       data: {
-        totalProducts,
-        activeOrders,
-        totalOrders,
-        totalCustomers,
-        newsletterSubscribers,
-        lowStockProducts: lowStockProducts.map(serializeDoc),
-        recentOrders: recentOrders.map(serializeDoc),
-        totalRevenue
+        totalProducts: analytics.products.totalProducts || 0,
+        activeOrders: (analytics.orders.pending || 0) + (analytics.orders.processing || 0) + (analytics.orders.Pending || 0) + (analytics.orders.Confirmed || 0),
+        totalOrders: Object.values(analytics.orders).reduce((sum: number, count: any) => sum + count, 0),
+        totalCustomers: analytics.users.totalUsers || 0,
+        newsletterSubscribers: await databaseService.getDb().collection('newsletter_subscribers').countDocuments(),
+        lowStockProducts: analytics.lowStockProducts.map(serializeDoc),
+        recentOrders: analytics.recentOrders.map(serializeDoc),
+        totalRevenue: analytics.revenue.totalRevenue || 0
       },
       message: 'Analytics fetched successfully'
-    });
+    };
+
+    // Cache the result
+    await cacheService.set(cacheKey, result, (cacheService.constructor as any).ttls.analytics);
+
+    res.set({
+      'X-Cache': 'MISS',
+      'Cache-Control': 'private, max-age=300'
+    }).json(result);
+
   } catch (error) {
+    logger.error('Analytics fetch error', error);
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -1220,7 +1419,7 @@ app.post('/api/chat/message', verifyToken, async (req: AuthedRequest, res: Respo
     
     // Get product information for context
     const products = await db!.collection('products').find({}).limit(20).toArray();
-    const productContext = products.map(p => ({
+    const productContext = products.map((p: any) => ({
       name: p.name,
       category: p.category,
       description: p.description,
@@ -1325,7 +1524,7 @@ INTELLIGENT FEATURES:
 - Share farm news and updates
 
 CURRENT PRODUCT INVENTORY:
-${productContext.map(p => `- ${p.name} (${p.category}): ${p.description} - KSh ${p.price}/${p.unit}, ${p.stock} available`).join('\n')}
+${productContext.map((p: any) => `- ${p.name} (${p.category}): ${p.description} - KSh ${p.price}/${p.unit}, ${p.stock} available`).join('\n')}
 
 RESPONSE GUIDELINES:
 
@@ -1515,24 +1714,82 @@ app.delete('/api/gallery/:id', verifyToken, adminOnly, async (req: AuthedRequest
 app.use((req: Request, res: Response) => {
   res.status(404).json({
     error: 'Route not found',
-    path: req.originalUrl
+    path: req.originalUrl,
+    method: req.method
   });
 });
 
 // Initialize database connection and start server
 const startServer = async () => {
   try {
-    await connectToDatabase();
-    
-    app.listen(PORT, () => {
+    // Connect to database first
+    db = await databaseService.connect();
+
+    // Connect to Redis cache
+    await cacheService.connect();
+
+    // Start the server
+    const server = app.listen(PORT, () => {
+      logger.info('🚀 Backend server started successfully', {
+        port: PORT,
+        environment: process.env.NODE_ENV || 'development',
+        database: 'connected',
+        cache: 'connected',
+        timestamp: new Date().toISOString()
+      });
+
       console.log(`🚀 Backend server running on http://localhost:${PORT}`);
       console.log(`📊 API Health check: http://localhost:${PORT}/api/health`);
+      console.log(`📈 Performance metrics: http://localhost:${PORT}/api/metrics`);
       console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🔗 MongoDB connected to edauDB`);
+      console.log(`🔗 MongoDB connected with optimized connection pooling`);
+      console.log(`⚡ Redis cache enabled for improved performance`);
       console.log(`🎯 Frontend-Backend concurrent setup active`);
     });
+
+    // Graceful shutdown handling
+    const gracefulShutdown = async (signal: string) => {
+      logger.info(`Received ${signal}, starting graceful shutdown`);
+
+      server.close(async () => {
+        logger.info('HTTP server closed');
+
+        try {
+          await databaseService.disconnect();
+          await cacheService.disconnect();
+          logger.info('Database and cache connections closed');
+          process.exit(0);
+        } catch (error) {
+          logger.error('Error during shutdown', error);
+          process.exit(1);
+        }
+      });
+
+      // Force shutdown after 10 seconds
+      setTimeout(() => {
+        logger.error('Forced shutdown after timeout');
+        process.exit(1);
+      }, 10000);
+    };
+
+    // Handle shutdown signals
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+    // Handle uncaught exceptions
+    process.on('uncaughtException', (error) => {
+      logger.error('Uncaught Exception', error);
+      gracefulShutdown('uncaughtException');
+    });
+
+    process.on('unhandledRejection', (reason, promise) => {
+      logger.error('Unhandled Rejection', { reason, promise });
+      gracefulShutdown('unhandledRejection');
+    });
+
   } catch (error) {
-    console.error('Failed to start server:', error);
+    logger.error('Failed to start server', error);
+    console.error('❌ Failed to start server:', error);
     process.exit(1);
   }
 };

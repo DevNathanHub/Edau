@@ -72,32 +72,27 @@ const SocialFAB = () => {
 
   return (
     <>
-      {/* WhatsApp button - fixed at bottom left */}
+      {/* WhatsApp button - positioned at same level as AI chat */}
       <a 
         href="https://wa.me/254727690165" 
         target="_blank" 
         rel="noopener noreferrer"
         
-        className="fixed bottom-12 left-2 h-10 w-10 flex items-center justify-center rounded-full shadow-lg bg-green-500 hover:bg-green-600 text-white z-40"
+        className="fixed bottom-20 left-4 h-12 w-12 flex items-center justify-center rounded-full shadow-lg bg-green-500 hover:bg-green-600 text-white z-50"
         aria-label="Contact us on WhatsApp"
       >
         <WhatsAppIcon />
       </a>
 
-      {/* Feedback button - fixed at right side, vertically aligned */}
+      {/* Feedback button - positioned above chat bubbles */}
       <Dialog>
         <DialogTrigger asChild>
           <Button 
           
-            className="fixed right-0 top-1/2 transform -translate-y-1/2 bg-amber-600 hover:bg-amber-700 shadow-lg z-40 rounded-l-md rounded-r-none h-auto w-6 opacity-80"
+            className="fixed bottom-36 right-4 bg-[#FFC107] hover:bg-[#E6A800] shadow-lg z-40 rounded-full h-10 w-10"
             aria-label="Give feedback"
           >
-            <div className="flex flex-col items-center py-2">
-              <ThumbsUp size={18} className="mb-2" />
-              <span className="text-xs whitespace-nowrap" style={{writingMode: 'vertical-rl', textOrientation: 'mixed', transform: 'rotate(180deg)'}}>
-                Feedback
-              </span>
-            </div>
+            <ThumbsUp size={20} />
           </Button>
         </DialogTrigger>
         <DialogContent>

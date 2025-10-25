@@ -166,3 +166,95 @@
     box-shadow: 0 8px 25px rgba(76, 175, 80, 0.15);
   }
 }
+
+/* Animated Background Elements */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-10px) translateX(5px); }
+}
+
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-8px) translateX(-3px); }
+}
+
+@keyframes float-fast {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-12px) translateX(7px); }
+}
+
+@keyframes bee-flight {
+  0% { transform: translateX(0px) translateY(0px) rotate(0deg); }
+  25% { transform: translateX(20px) translateY(-5px) rotate(5deg); }
+  50% { transform: translateX(40px) translateY(0px) rotate(0deg); }
+  75% { transform: translateX(20px) translateY(5px) rotate(-5deg); }
+  100% { transform: translateX(0px) translateY(0px) rotate(0deg); }
+}
+
+@keyframes bee-flight-delayed {
+  0% { transform: translateX(0px) translateY(0px) rotate(0deg); }
+  20% { transform: translateX(-15px) translateY(-3px) rotate(-3deg); }
+  40% { transform: translateX(-30px) translateY(0px) rotate(0deg); }
+  60% { transform: translateX(-15px) translateY(3px) rotate(3deg); }
+  80% { transform: translateX(0px) translateY(0px) rotate(0deg); }
+  100% { transform: translateX(0px) translateY(0px) rotate(0deg); }
+}
+
+@keyframes float-particles {
+  0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+  50% { transform: translateY(-15px) rotate(180deg); opacity: 1; }
+}
+
+@keyframes float-particles-delayed {
+  0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+  50% { transform: translateY(-12px) rotate(180deg); opacity: 0.9; }
+}
+
+@keyframes float-particles-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.5; }
+  50% { transform: translateY(-8px) rotate(180deg); opacity: 0.8; }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.2; }
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 5s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float-fast 4s ease-in-out infinite;
+}
+
+.animate-bee-flight {
+  animation: bee-flight 8s ease-in-out infinite;
+}
+
+.animate-bee-flight-delayed {
+  animation: bee-flight-delayed 10s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.animate-float-particles {
+  animation: float-particles 4s ease-in-out infinite;
+}
+
+.animate-float-particles-delayed {
+  animation: float-particles-delayed 5s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.animate-float-particles-slow {
+  animation: float-particles-slow 6s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 8s ease-in-out infinite;
+}

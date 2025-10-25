@@ -1,73 +1,137 @@
-# Welcome to your Lovable project
+# 🌾 Edau Farm - West Pokot's Premier Sustainable Farm
 
-## Project info
+Welcome to **Edau Farm**, a family-owned sustainable agricultural enterprise located in the heart of West Pokot, Kenya. We specialize in producing premium Acacia honey, fresh seasonal fruits, premium Dorper sheep, and free-range poultry — all raised with traditional wisdom and modern sustainable practices.
 
-**URL**: https://lovable.dev/projects/2fd70314-e95f-42f0-99c9-bd57458053fa
+## 🏡 About Edau Farm
 
-## How can I edit this code?
+Founded in 2015, Edau Farm has been committed to sustainable agriculture that honors our ancestral lands while embracing eco-friendly farming methods. Our farm produces:
 
-There are several ways of editing your application.
+- **🌸 Acacia Honey** - Pure, raw honey harvested from the rich Acacia forests of West Pokot
+- **🍎 Seasonal Fruits** - Fresh, organic fruits grown in our fertile orchards
+- **🐑 Dorper Sheep** - Premium breeding stock known for rapid growth and excellent meat quality
+- **🐔 Free-Range Poultry** - Humanely raised chickens producing natural eggs and meat
 
-**Use Lovable**
+## 🎨 Design System
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/2fd70314-e95f-42f0-99c9-bd57458053fa) and start prompting.
+### Primary Colors
+- **Farm Green** `#4CAF50` - Represents crops, freshness, and sustainable farming
+- **Honey Gold** `#FFC107` - Rich, golden honey color for premium products
 
-Changes made via Lovable will be committed automatically to this repo.
+### Secondary Colors (Earth & Nature)
+- **Soil Brown** `#8D6E63` - Earth tone for backgrounds, cards, or text contrast
+- **Cream White** `#FFF8E1` - Light organic base color for section backgrounds
+- **Leaf Accent** `#81C784` - Fresh, bright green accent for icons or hover states
 
-**Use your preferred IDE**
+## 🚀 Features
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **🤖 AI Farm Assistant** - 24/7 intelligent chat support for product inquiries, orders, and farm visits
+- **📱 Responsive Design** - Optimized for all devices with Pinterest-style gallery
+- **🛒 E-commerce Platform** - Complete online ordering and payment system
+- **📅 Farm Visit Booking** - Schedule guided tours of our sustainable operations
+- **👨‍💼 Admin Dashboard** - Comprehensive management tools for farm operations
+- **📊 Analytics & Reporting** - Real-time insights into farm performance
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🛠️ Technology Stack
 
-Follow these steps:
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: Tailwind CSS, shadcn/ui components
+- **Backend**: Node.js, Express.js, MongoDB
+- **Authentication**: JWT with role-based access
+- **File Storage**: Cloudinary for image management
+- **AI Integration**: Google Gemini for intelligent chat assistance
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+## 📦 Installation & Setup
+
+### Prerequisites
+- Node.js 18+ and npm
+- MongoDB database
+- Cloudinary account (for image uploads)
+
+### Local Development
+
+```bash
+# Clone the repository
 git clone <YOUR_GIT_URL>
+cd edau-farm
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Install dependencies
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Environment Variables
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Create a `.env` file in the root directory:
 
-**Use GitHub Codespaces**
+```env
+# Database
+MONGODB_URI=mongodb+srv://...
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Authentication
+JWT_SECRET=your-jwt-secret-key
 
-## What technologies are used for this project?
+# API
+VITE_API_URL=http://localhost:3001/api
 
-This project is built with:
+# Cloudinary (for image uploads)
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🏗️ Project Structure
 
-## How can I deploy this project?
+```
+edau-farm/
+├── public/                 # Static assets
+│   ├── honeycomb.svg      # Honeycomb pattern SVG
+│   └── favicon.ico
+├── src/
+│   ├── components/        # Reusable UI components
+│   ├── pages/            # Page components
+│   ├── contexts/         # React contexts
+│   ├── hooks/            # Custom hooks
+│   ├── lib/              # Utilities and API
+│   └── types.ts          # TypeScript definitions
+├── server/                # Backend server
+│   ├── server.ts         # Main server file
+│   └── scripts/          # Database seeding scripts
+└── package.json
+```
 
-Simply open [Lovable](https://lovable.dev/projects/2fd70314-e95f-42f0-99c9-bd57458053fa) and click on Share -> Publish.
+## 🌐 Deployment
 
-## Can I connect a custom domain to my Lovable project?
+### Frontend Deployment
+```bash
+npm run build
+npm run preview
+```
 
-Yes, you can!
+### Backend Deployment
+```bash
+npm run build:backend
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Full Stack Deployment
+The application is configured for deployment on platforms like Vercel, Netlify, or Railway.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 📞 Contact & Support
+
+- **Location**: West Pokot, Kenya
+- **Phone**: +254 727 690 165
+- **Email**: info@edaufarm.com
+- **Website**: [edau.loopnet.tech](https://edau.loopnet.tech)
+
+## 🤝 Contributing
+
+We welcome contributions to improve Edau Farm's digital presence. Please read our contributing guidelines and submit pull requests for any improvements.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+*Edau Farm - Where Tradition Meets Sustainability* 🌾

@@ -126,7 +126,8 @@ const ProductDetail = () => {
 
     // Direct message to admin number for ordering
     const adminNumber = "254727690165"; // Admin WhatsApp number
-    const orderMessage = `Hello! I would like to order:\n\n🐝 *${product.name}*\n📂 Category: ${categoryNames[category] || "Farm Products"}\n💰 Price: KSh ${product.price.toLocaleString()}\n📦 Quantity: ${quantity}\n💵 Total: KSh ${(product.price * quantity).toLocaleString()}\n\nPlease confirm availability and delivery details. Thank you!`;
+    const productUrl = `${window.location.origin}/products/${product.id}`;
+    const orderMessage = `Hello! I would like to order:\n\n🐝 *${product.name}*\n📂 Category: ${categoryNames[category] || "Farm Products"}\n💰 Price: KSh ${product.price.toLocaleString()}\n📦 Quantity: ${quantity}\n💵 Total: KSh ${(product.price * quantity).toLocaleString()}\n🔗 Product Link: ${productUrl}\n\nPlease confirm availability and delivery details. Thank you!`;
 
     // Encode message for URL
     const encodedMessage = encodeURIComponent(orderMessage);
@@ -394,7 +395,7 @@ const ProductDetail = () => {
                       <Link to={`/products/${similarProduct.id}`} className="w-full">
                         <Button className="w-full bg-green-600 hover:bg-green-700 transition-colors">
                           <ShoppingCart className="mr-2 h-4 w-4" />
-                          View Product
+                          More Info
                         </Button>
                       </Link>
                     </CardFooter>
@@ -440,7 +441,7 @@ const ProductDetail = () => {
                       <Link to={`/products/${recommendedProduct.id}`} className="w-full">
                         <Button className="w-full bg-green-600 hover:bg-green-700 transition-colors">
                           <ShoppingCart className="mr-2 h-4 w-4" />
-                          View Product
+                          More Info
                         </Button>
                       </Link>
                     </CardFooter>

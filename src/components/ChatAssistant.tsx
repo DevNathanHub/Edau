@@ -535,9 +535,23 @@ const ChatAssistant = () => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button className="fixed bottom-12 right-2 h-10 w-10 rounded-full shadow-lg z-50 bg-green-600 hover:bg-green-700" size="icon">
-          <MessageCircle className="h-6 w-6" />
-        </Button>
+        <div className="fixed bottom-20 right-4 z-50">
+          <Button className="h-12 w-12 rounded-full shadow-lg bg-[#4CAF50] hover:bg-[#388E3C] relative" size="icon">
+            <MessageCircle className="h-6 w-6" />
+            {/* Active badge indicator */}
+            {currentConversation && (currentConversation.messages || []).length > 0 && (
+              <div className="absolute -top-1 -right-1 h-4 w-4 bg-[#FFC107] rounded-full flex items-center justify-center">
+                <div className="h-2 w-2 bg-[#FFC107] rounded-full animate-pulse"></div>
+              </div>
+            )}
+            {/* Notification badge for new messages */}
+            {totalTokensUsed > 0 && (
+              <div className="absolute -top-2 -left-2 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white font-bold">
+                !
+              </div>
+            )}
+          </Button>
+        </div>
       </SheetTrigger>
 
       <SheetContent className="w-[95vw] sm:w-[500px] flex flex-col p-0">

@@ -19,6 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { apiService } from "@/lib/api";
 import { ProductCardSkeleton } from "@/components/ui/product-skeleton";
+import { Helmet } from "react-helmet-async";
 
 // Product categories with their respective icons
 const categoryIcons: Record<string, JSX.Element> = {
@@ -112,11 +113,26 @@ const fetchProducts = async (): Promise<Product[]> => {
       stock: Number(product.stock ?? 10),
       category: product.category || undefined,
     };
-    let category = base.category || 'poultry';
+
+    // If category is already set from backend, use it
+    if (base.category) {
+      // Normalize category to match filter values
+      const cat = base.category.toLowerCase();
+      if (cat.includes('honey')) return { ...base, category: 'honey' };
+      if (cat.includes('sheep') || cat.includes('dorper')) return { ...base, category: 'sheep' };
+      if (cat.includes('fruit')) return { ...base, category: 'fruits' };
+      if (cat.includes('poultry') || cat.includes('chicken') || cat.includes('egg')) return { ...base, category: 'poultry' };
+      return { ...base, category: base.category.toLowerCase() };
+    }
+
+    // Otherwise, assign category based on name matching
+    let category = 'poultry'; // default
     const lower = (base.name || '').toLowerCase();
     if (lower.includes('honey')) category = 'honey';
-    else if (lower.includes('sheep') || lower.includes('dorper')) category = 'sheep';
-    else if (lower.includes('fruit') || lower.includes('apple') || lower.includes('peach')) category = 'fruits';
+    else if (lower.includes('sheep') || lower.includes('dorper') || lower.includes('lamb')) category = 'sheep';
+    else if (lower.includes('fruit') || lower.includes('apple') || lower.includes('peach') || lower.includes('orange')) category = 'fruits';
+    else if (lower.includes('chicken') || lower.includes('egg') || lower.includes('poultry')) category = 'poultry';
+
     return { ...base, category };
   });
 };
@@ -152,8 +168,10 @@ const Products = () => {
       (product.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (product.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Category filter
-    const matchesCategory = selectedCategory === '' || product.category === selectedCategory;
+    // Category filter - ensure exact match with normalized categories
+    const normalizedProductCategory = (product.category || '').toLowerCase().trim();
+    const normalizedSelectedCategory = (selectedCategory || '').toLowerCase().trim();
+    const matchesCategory = selectedCategory === '' || normalizedProductCategory === normalizedSelectedCategory;
     
     // Price filter
     let matchesPrice = true;
@@ -220,6 +238,15 @@ const Products = () => {
   
   return (
     <div className="min-h-screen flex flex-col pb-[60px] md:pb-0">
+      <Helmet>
+        <title>Products - Edau Farm | Acacia Honey, Fresh Fruits & Premium Livestock</title>
+        <meta name="description" content="Shop our premium farm products: pure Acacia honey from West Pokot, seasonal fruits, Dorper sheep, and free-range poultry. All sustainably raised with care." />
+        <meta name="keywords" content="buy honey, Acacia honey, fresh fruits, Dorper sheep, free-range poultry, farm products, sustainable farming, West Pokot products" />
+        <meta property="og:title" content="Farm Products - Edau Farm" />
+        <meta property="og:description" content="Premium Acacia honey, fresh fruits, and sustainable livestock from West Pokot." />
+        <meta property="og:url" content="https://edau.loopnet.tech/products" />
+        <link rel="canonical" href="https://edau.loopnet.tech/products" />
+      </Helmet>
       <Navigation />
       <main className="flex-1 py-12 bg-gray-50">
         <div className="container mx-auto px-4">
@@ -408,7 +435,7 @@ const Products = () => {
                       <Link to={`/products/${product.id}`} className="w-full">
                         <Button className="w-full bg-green-600 hover:bg-green-700 transition-colors">
                           <ShoppingCart className="mr-2 h-4 w-4" />
-                          View Product
+                          More Info
                         </Button>
                       </Link>
                     </CardFooter>

@@ -2,23 +2,48 @@
 import Navigation from "../components/Navigation";
 import Hero from "../components/Hero";
 import Features from "../components/Features";
+import AIChatSection from "../components/AIChatSection";
 import Contact from "../components/Contact";
 import Footer from "../components/Footer";
 import { Button } from "@/components/ui/button";
 import { HeartHandshake, Calendar, Users, Star, Award, Truck, Shield, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>Edau Farm - Fresh Acacia Honey & Sustainable Products from West Pokot</title>
+        <meta name="description" content="Discover pure Acacia honey from West Pokot, premium seasonal fruits, Dorper sheep, and free-range poultry. Sustainable farming since 2015 with AI-powered farm assistance." />
+        <meta name="keywords" content="Acacia honey, West Pokot, sustainable farming, organic products, farm fresh, Dorper sheep, free-range poultry, seasonal fruits" />
+        <meta property="og:title" content="Edau Farm - Fresh Acacia Honey & Sustainable Products from West Pokot" />
+        <meta property="og:description" content="Pure Acacia honey from West Pokot's rich forests. Premium sustainable farm products with AI-powered assistance." />
+        <meta property="og:image" content="https://edau.loopnet.tech/images/edau-farm-og.jpg" />
+        <meta property="og:url" content="https://edau.loopnet.tech" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Edau Farm - West Pokot's Premier Sustainable Farm" />
+        <meta name="twitter:description" content="Pure Acacia honey and sustainable farm products from West Pokot, Kenya." />
+        <link rel="canonical" href="https://edau.loopnet.tech" />
+      </Helmet>
       <Navigation />
       <main>
         <Hero />
         <Features />
+        <AIChatSection />
 
         {/* Statistics Section */}
-        <section className="py-16 bg-green-600 text-white">
-          <div className="container mx-auto px-4">
+        <section className="min-h-screen flex items-center py-16 bg-[#4CAF50] text-white relative">
+          {/* Honeycomb background pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <img 
+              src="/honeycomb.svg" 
+              alt="Honeycomb pattern" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="container mx-auto px-4 relative z-10">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               <div>
                 <div className="text-3xl md:text-4xl font-bold mb-2">9+</div>
@@ -41,8 +66,16 @@ const Index = () => {
         </section>
 
         {/* Special Offers Section */}
-        <section className="py-16 bg-amber-50">
-          <div className="container mx-auto px-4">
+        <section className="min-h-screen flex items-center py-16 bg-[#FFF8E1] relative">
+          {/* Honeycomb background pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <img 
+              src="/honeycomb.svg" 
+              alt="Honeycomb pattern" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">Limited Time Offers</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -51,30 +84,30 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              <div className="bg-white rounded-xl shadow-lg p-8 border-l-4 border-amber-500">
+              <div className="bg-white rounded-xl shadow-lg p-8 border-l-4 border-[#FFC107]">
                 <div className="flex items-center mb-4">
-                  <Award className="h-8 w-8 text-amber-500 mr-3" />
+                  <Award className="h-8 w-8 text-[#FFC107] mr-3" />
                   <h3 className="text-2xl font-bold text-gray-800">First Order Discount</h3>
                 </div>
                 <p className="text-gray-600 mb-6">Get 15% off your first purchase with code WELCOME15</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-green-600">Valid until Dec 31</span>
+                  <span className="text-2xl font-bold text-[#4CAF50]">Valid until Dec 31</span>
                   <Link to="/products">
-                    <Button className="bg-amber-600 hover:bg-amber-700">Shop Now</Button>
+                    <Button className="bg-[#4CAF50] hover:bg-[#388E3C]">Shop Now</Button>
                   </Link>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-lg p-8 border-l-4 border-green-500">
+              <div className="bg-white rounded-xl shadow-lg p-8 border-l-4 border-[#4CAF50]">
                 <div className="flex items-center mb-4">
-                  <Truck className="h-8 w-8 text-green-500 mr-3" />
+                  <Truck className="h-8 w-8 text-[#4CAF50] mr-3" />
                   <h3 className="text-2xl font-bold text-gray-800">Free Delivery</h3>
                 </div>
                 <p className="text-gray-600 mb-6">Free delivery on orders over KSh 3,000 within Nairobi</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-green-600">Always Available</span>
+                  <span className="text-2xl font-bold text-[#4CAF50]">Always Available</span>
                   <Link to="/products">
-                    <Button className="bg-green-600 hover:bg-green-700">Order Now</Button>
+                    <Button className="bg-[#4CAF50] hover:bg-[#388E3C]">Order Now</Button>
                   </Link>
                 </div>
               </div>
@@ -83,8 +116,16 @@ const Index = () => {
         </section>
 
         {/* Testimonials Section */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
+        <section className="min-h-screen flex items-center py-16 bg-[#8D6E63]/5 relative">
+          {/* Honeycomb background pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <img 
+              src="/honeycomb.svg" 
+              alt="Honeycomb pattern" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">What Our Customers Say</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -93,18 +134,18 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              <div className="bg-gray-50 rounded-xl p-6 shadow-md">
+              <div className="bg-[#FFF8E1] rounded-xl p-6 shadow-md border border-[#81C784]/20">
                 <div className="flex items-center mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-amber-400 fill-current" />
+                    <Star key={i} className="h-5 w-5 text-[#FFC107] fill-current" />
                   ))}
                 </div>
                 <p className="text-gray-700 mb-4 italic">
-                  "The honey is absolutely incredible! We've been buying from Edau Farm for 2 years now,
+                  "The Acacia honey is absolutely incredible! We've been buying from Edau Farm for 2 years now,
                   and the quality never disappoints. Our kids love the farm visits too!"
                 </p>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                  <div className="w-10 h-10 bg-[#4CAF50] rounded-full flex items-center justify-center text-white font-bold mr-3">
                     SM
                   </div>
                   <div>
@@ -114,10 +155,10 @@ const Index = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-6 shadow-md">
+              <div className="bg-[#FFF8E1] rounded-xl p-6 shadow-md border border-[#81C784]/20">
                 <div className="flex items-center mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-amber-400 fill-current" />
+                    <Star key={i} className="h-5 w-5 text-[#FFC107] fill-current" />
                   ))}
                 </div>
                 <p className="text-gray-700 mb-4 italic">
@@ -125,7 +166,7 @@ const Index = () => {
                   is perfect for our household of 5. Highly recommend!"
                 </p>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                  <div className="w-10 h-10 bg-[#4CAF50] rounded-full flex items-center justify-center text-white font-bold mr-3">
                     JK
                   </div>
                   <div>
@@ -135,18 +176,18 @@ const Index = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-6 shadow-md">
+              <div className="bg-[#FFF8E1] rounded-xl p-6 shadow-md border border-[#81C784]/20">
                 <div className="flex items-center mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-amber-400 fill-current" />
+                    <Star key={i} className="h-5 w-5 text-[#FFC107] fill-current" />
                   ))}
                 </div>
                 <p className="text-gray-700 mb-4 italic">
-                  "The farm visit was amazing! Our children learned so much about sustainable farming.
+                  "The farm visit was amazing! Our children learned so much about sustainable farming in West Pokot.
                   The chicken we bought was the most flavorful we've ever had."
                 </p>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                  <div className="w-10 h-10 bg-[#4CAF50] rounded-full flex items-center justify-center text-white font-bold mr-3">
                     AW
                   </div>
                   <div>
@@ -160,8 +201,16 @@ const Index = () => {
         </section>
 
         {/* Farm Gallery Section */}
-        <section className="py-16 bg-green-50">
-          <div className="container mx-auto px-4">
+        <section className="min-h-screen flex items-center py-16 bg-[#81C784]/10 relative">
+          {/* Honeycomb background pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <img 
+              src="/honeycomb.svg" 
+              alt="Honeycomb pattern" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">Life at Edau Farm</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -215,8 +264,16 @@ const Index = () => {
         </section>
 
         {/* Why Choose Us Section */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
+        <section className="min-h-screen flex items-center py-16 bg-white relative">
+          {/* Honeycomb background pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <img 
+              src="/honeycomb.svg" 
+              alt="Honeycomb pattern" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">Why Choose Edau Farm?</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -226,40 +283,48 @@ const Index = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Shield className="h-8 w-8 text-green-600" />
+                <div className="w-16 h-16 bg-[#81C784] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-gray-800">100% Natural</h3>
                 <p className="text-gray-600">
-                  No antibiotics, no hormones, no artificial additives. Just pure, natural farm products.
+                  No antibiotics, no hormones, no artificial additives. Just pure, natural farm products from West Pokot.
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <HeartHandshake className="h-8 w-8 text-green-600" />
+                <div className="w-16 h-16 bg-[#4CAF50] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <HeartHandshake className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-gray-800">Family Owned</h3>
                 <p className="text-gray-600">
-                  Three generations of farming expertise, ensuring the highest standards of care and quality.
+                  Three generations of farming expertise in West Pokot, ensuring the highest standards of care and quality.
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Truck className="h-8 w-8 text-green-600" />
+                <div className="w-16 h-16 bg-[#FFC107] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Truck className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-gray-800">Fresh Delivery</h3>
                 <p className="text-gray-600">
-                  Direct from farm to your door within 24 hours of harvest, ensuring maximum freshness.
+                  Direct from our West Pokot farm to your door within 24 hours of harvest, ensuring maximum freshness.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="about" className="py-16 bg-green-50">
-          <div className="container mx-auto px-4">
+        <section id="about" className="min-h-screen flex items-center py-16 bg-[#FFF8E1] relative">
+          {/* Honeycomb background pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <img 
+              src="/honeycomb.svg" 
+              alt="Honeycomb pattern" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">Our Farm Story</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -281,18 +346,18 @@ const Index = () => {
               <div className="md:w-1/2">
                 <div className="max-w-lg space-y-4">
                   <p className="text-gray-700">
-                    Edau Farm began in 2015 when our family decided to transform our ancestral land into a 
-                    sustainable farm that would honor traditional farming wisdom while embracing modern, 
+                    Edau Farm began in 2015 when our family decided to transform our ancestral land in West Pokot 
+                    into a sustainable farm that would honor traditional farming wisdom while embracing modern, 
                     eco-friendly practices.
                   </p>
                   <p className="text-gray-700">
                     Today, we've grown into a diversified agribusiness with four thriving product lines: 
-                    our award-winning honey, premium Dorper sheep breeding program, seasonal fruit orchards, 
-                    and humanely raised free-range poultry.
+                    our award-winning Acacia honey from the rich forests of West Pokot, premium Dorper sheep breeding program, 
+                    seasonal fruit orchards, and humanely raised free-range poultry.
                   </p>
                   <p className="text-gray-700">
                     Every product from Edau Farm is raised with care, harvested with respect for nature, and 
-                    brought to you with our commitment to quality and sustainability.
+                    brought to you with our commitment to quality and sustainability in West Pokot.
                   </p>
                 </div>
                 

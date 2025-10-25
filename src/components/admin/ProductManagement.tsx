@@ -13,8 +13,9 @@ const ProductManagement: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<Partial<Product>>({
@@ -33,12 +34,32 @@ const ProductManagement: React.FC = () => {
   const fetchProducts = async () => {
     setLoading(true);
     setError("");
-    const res = await apiService.getProducts();
-    if (res.error) setError(res.error);
-    const productsArr = (res.data && (res.data as any).data) || [];
-    setProducts(productsArr as Product[]);
-    setFilteredProducts(productsArr as Product[]);
-    setLoading(false);
+    try {
+      const res = await apiService.getProducts();
+      
+      if (res.error) {
+        setError(res.error);
+        setProducts([]);
+        setFilteredProducts([]);
+        return;
+      }
+      
+      const productsArr = (res.data && (res.data as any).data) || [];
+      
+      // Ensure we have an array and log for debugging
+      const safeProductsArr = Array.isArray(productsArr) ? productsArr : [];
+      console.log('Admin ProductManagement: Fetched products:', safeProductsArr.length, 'items');
+      
+      setProducts(safeProductsArr as Product[]);
+      setFilteredProducts(safeProductsArr as Product[]);
+    } catch (error) {
+      console.error('Admin ProductManagement: Error fetching products:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch products');
+      setProducts([]);
+      setFilteredProducts([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -47,26 +68,43 @@ const ProductManagement: React.FC = () => {
   }, []);
 
   const fetchCategories = async () => {
-    const res = await apiService.getCategories();
-    setCategories((res.data as any)?.data || []);
+    try {
+      console.log('ProductManagement: Fetching categories');
+      const res = await apiService.getCategories();
+      console.log('ProductManagement: Categories API response:', res);
+      const categoriesArr = (res.data as any)?.data || [];
+      console.log('ProductManagement: Categories array:', categoriesArr);
+      setCategories(Array.isArray(categoriesArr) ? categoriesArr : []);
+    } catch (error) {
+      console.error('ProductManagement: Error fetching categories:', error);
+      setCategories([]);
+    }
   };
 
   useEffect(() => {
+    console.log('ProductManagement: Filtering effect triggered', { filterCategory, searchTerm, productsLength: products.length });
     let filtered = products;
 
     // Filter by category
     if (filterCategory !== "all") {
-      filtered = filtered.filter(p => p.category === filterCategory);
+      console.log('ProductManagement: Filtering by category:', filterCategory);
+      filtered = filtered.filter(p => {
+        const matches = p.category === filterCategory;
+        console.log('ProductManagement: Category match check:', { productCategory: p.category, filterCategory, matches });
+        return matches;
+      });
     }
 
     // Search by name or tags
     if (searchTerm) {
+      console.log('ProductManagement: Filtering by search term:', searchTerm);
       filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+        (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (p.tags || []).some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
+    console.log('ProductManagement: Filtered products count:', filtered.length);
     setFilteredProducts(filtered);
   }, [filterCategory, searchTerm, products]);
 
@@ -140,14 +178,41 @@ const ProductManagement: React.FC = () => {
   };
 
   const handleDelete = async (id?: string) => {
-    if (!id) return;
-    if (!confirm("Are you sure you want to delete this product?")) return;
+    if (!id) {
+      setError("Product ID is missing");
+      return;
+    }
+
+    // Use a more modern confirmation dialog
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this product?\n\nThis action cannot be undone."
+    );
+
+    if (!confirmed) return;
+
     setLoading(true);
     setError("");
-    const res = await apiService.deleteProduct(id);
-    if (res.error) setError(res.error);
-    await fetchProducts();
-    setLoading(false);
+    setSuccess("");
+
+    try {
+      const res = await apiService.deleteProduct(id);
+      if (res.error) {
+        setError(res.error);
+        console.error("Delete product error:", res.error);
+      } else {
+        // Success - refresh the products list
+        await fetchProducts();
+        setSuccess("Product deleted successfully");
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccess(""), 3000);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to delete product";
+      setError(errorMessage);
+      console.error("Delete product exception:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const shareOnWhatsApp = (product: Product) => {
@@ -236,100 +301,137 @@ const ProductManagement: React.FC = () => {
         </Card>
       )}
 
-      {/* Products Masonry Grid */}
-      <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
-        {filteredProducts.map(product => (
-          <Card key={product._id} className="break-inside-avoid hover-lift mb-6">
-            <div className="relative">
-              <img
-                src={product.image_url || `https://placehold.co/300x200?text=${encodeURIComponent(product.name)}`}
-                alt={product.name}
-                className="w-full h-48 object-cover rounded-t-lg"
-              />
-              <div className="absolute top-3 right-3 flex gap-2">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
-                  onClick={() => shareOnWhatsApp(product)}
-                  title="Share on WhatsApp"
-                >
-                  <Share2 className="w-4 h-4 text-green-600" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
-                  onClick={() => handleOpenModal(product)}
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  className="h-8 w-8 p-0"
-                  onClick={() => handleDelete(product._id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between mb-2">
-                <CardTitle className="text-lg leading-tight">{product.name}</CardTitle>
-                <Badge className={`text-xs ${getCategoryColor(product.category || '')}`}>
-                  {product.category}
-                </Badge>
-              </div>
-              <CardDescription className="text-sm text-gray-600 mb-3 line-clamp-2">
-                {product.description}
-              </CardDescription>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-1">
-                  <DollarSign className={`w-4 h-4 ${getPriceColor(product.price)}`} />
-                  <span className={`text-xl font-bold ${getPriceColor(product.price)}`}>
-                    KSh {product.price?.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <Package className="w-4 h-4" />
-                  <span>{product.stock} {product.unit}</span>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-1 mb-3">
-                {product.tags?.slice(0, 3).map(tag => (
-                  <Badge key={tag} variant="outline" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-                {product.tags && product.tags.length > 3 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{product.tags.length - 3}
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>SKU: {product.sku || 'N/A'}</span>
-                <span className={product.availability ? 'text-green-600' : 'text-red-600'}>
-                  {product.availability ? 'Available' : 'Unavailable'}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {filteredProducts.length === 0 && !loading && (
-        <Card className="text-center py-12">
-          <CardContent>
-            <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
-            <Button onClick={() => { setSearchTerm(''); setFilterCategory('all'); }}>
-              Clear Filters
-            </Button>
+      {success && (
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="p-4">
+            <p className="text-green-600">{success}</p>
           </CardContent>
         </Card>
+      )}
+
+      {/* Products Masonry Grid */}
+      {loading ? (
+        <div className="text-center py-12">
+          <p className="text-lg text-gray-600">Loading products...</p>
+        </div>
+      ) : (
+        <>
+          <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+            {filteredProducts && filteredProducts.length > 0 ? (
+              filteredProducts.map((product, index) => {
+                console.log('ProductManagement: Rendering product:', product);
+                return (
+                  <Card key={product._id || product.id || `product-${index}`} className="break-inside-avoid hover-lift mb-6">
+                    <div className="relative">
+                      <img
+                        src={product.image_url || product.imageURL?.[0] || `https://placehold.co/300x200?text=${encodeURIComponent(product.name || 'Product')}`}
+                        alt={product.name || 'Product'}
+                        className="w-full h-48 object-cover rounded-t-lg"
+                      />
+                      <div className="absolute top-3 right-3 flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                          onClick={() => shareOnWhatsApp(product)}
+                          title="Share on WhatsApp"
+                        >
+                          <Share2 className="w-4 h-4 text-green-600" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                          onClick={() => handleOpenModal(product)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="h-8 w-8 p-0"
+                          onClick={() => handleDelete(product._id || product.id)}
+                          disabled={loading}
+                          title="Delete Product"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <CardTitle className="text-lg leading-tight">{product.name || 'Unnamed Product'}</CardTitle>
+                        <Badge className={`text-xs ${getCategoryColor(product.category || '')}`}>
+                          {product.category || 'Uncategorized'}
+                        </Badge>
+                      </div>
+                      <CardDescription className="text-sm text-gray-600 mb-3 line-clamp-2">
+                        {product.description || 'No description available'}
+                      </CardDescription>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-1">
+                          <DollarSign className={`w-4 h-4 ${getPriceColor(product.price || 0)}`} />
+                          <span className={`text-xl font-bold ${getPriceColor(product.price || 0)}`}>
+                            KSh {(product.price || 0).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 text-sm text-gray-500">
+                          <Package className="w-4 h-4" />
+                          <span>{product.stock || 0} {product.unit || 'units'}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {product.tags && product.tags.length > 0 ? (
+                          <>
+                            {product.tags.slice(0, 3).map((tag, tagIndex) => (
+                              <Badge key={tagIndex} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                            {product.tags.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{product.tags.length - 3}
+                              </Badge>
+                            )}
+                          </>
+                        ) : (
+                          <Badge variant="outline" className="text-xs text-gray-400">
+                            No tags
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>SKU: {product.sku || 'N/A'}</span>
+                        <span className={(product.availability !== false) ? 'text-green-600' : 'text-red-600'}>
+                          {(product.availability !== false) ? 'Available' : 'Unavailable'}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            ) : (
+              <div className="col-span-full">
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+                    <p className="text-gray-500 mb-4">
+                      {filteredProducts && filteredProducts.length === 0 && products.length > 0 
+                        ? "No products match your current filters. Try adjusting your search or filter criteria." 
+                        : "No products available. Add your first product to get started."}
+                    </p>
+                    {filteredProducts && filteredProducts.length === 0 && products.length > 0 && (
+                      <Button onClick={() => { setSearchTerm(''); setFilterCategory('all'); }}>
+                        Clear Filters
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
+        </>
       )}
 
       {/* Glassmorphism Modal */}

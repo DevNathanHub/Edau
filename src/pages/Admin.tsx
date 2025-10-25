@@ -15,10 +15,16 @@ import FarmVisitsManagement from "@/components/admin/FarmVisitsManagement";
 import NewsletterManagement from "@/components/admin/NewsletterManagement";
 import CategoryManagement from "@/components/admin/CategoryManagement";
 import CreateOrderForUser from "@/components/admin/CreateOrderForUser";
+import { Helmet } from "react-helmet-async";
 
 const Admin = () => {
   return (
     <AdminRoute>
+      <Helmet>
+        <title>Admin Dashboard - Edau Farm Management</title>
+        <meta name="description" content="Edau Farm administrative dashboard for managing products, orders, users, and farm operations." />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="min-h-screen bg-gray-50 flex">
         <AdminSidebar />
         <div className="flex-1 flex flex-col overflow-hidden">

@@ -21,7 +21,7 @@ const CategoryManagement: React.FC = () => {
     setError("");
     const res = await apiService.getCategories?.();
     if (res?.error) setError(res.error);
-    setCategories((res?.data as any)?.data || []);
+    setCategories((res?.data as any) || []);
     setLoading(false);
   };
 

@@ -665,7 +665,7 @@ const ChatAssistant = () => {
               <Bot className="h-6 w-6" />
             </Button>
             {/* Ask AI? tag */}
-            <div className="absolute -top-2 -left-2 bg-[#FFC107] text-black text-xs font-bold px-2 py-1 rounded-full shadow-md">
+            <div className="absolute -top-6 -left-6 bg-[#FFC107] text-black text-xs font-bold px-2 py-1 rounded-full shadow-md">
               Ask AI?
             </div>
             {/* Active badge indicator */}

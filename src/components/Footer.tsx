@@ -105,10 +105,7 @@ const Footer = () => {
             <Link to="/" className="text-gray-600 hover:text-green-600 text-sm">Terms</Link>
             <Link to="/" className="text-gray-600 hover:text-green-600 text-sm">Privacy</Link>
             <Link to="/" className="text-gray-600 hover:text-green-600 text-sm">Shipping</Link>
-            <div className="flex items-center text-gray-600 text-sm">
-              <Heart className="h-3 w-3 text-red-500 mr-1" />
-              <span>Made with love in Kenya</span>
-            </div>
+          
           </div>
         </div>
       </div>

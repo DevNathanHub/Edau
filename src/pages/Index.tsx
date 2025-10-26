@@ -156,29 +156,29 @@ const Index = () => {
       </Helmet>
 
       {/* Section Navigation */}
-      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-50 hidden md:flex flex-col space-y-2">
-        {sections.map((section, index) => (
-          <button
-            key={section.id}
-            onClick={() => scrollToSection(section.id, index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentSection 
-                ? 'bg-amber-600 scale-125' 
-                : 'bg-white/50 hover:bg-white/75'
-            }`}
-            title={section.name}
-          />
-        ))}
-      </div>
-
-      {/* Navigation arrows */}
+      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-50 hidden md:flex">
+        <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-full p-3 flex flex-col space-y-2">
+          {sections.map((section, index) => (
+            <button
+              key={section.id}
+              onClick={() => scrollToSection(section.id, index)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === currentSection
+                  ? 'bg-amber-600 scale-125'
+                  : 'bg-white/50 hover:bg-white/75'
+              }`}
+              title={section.name}
+            />
+          ))}
+        </div>
+      </div>      {/* Navigation arrows */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col space-y-2">
         <button
           onClick={() => navigateSection('up')}
           disabled={currentSection === 0}
           className={`w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-all duration-300 ${
-            currentSection === 0 
-              ? 'opacity-50 cursor-not-allowed' 
+            currentSection === 0
+              ? 'opacity-50 cursor-not-allowed'
               : 'hover:bg-white/30 hover:scale-110'
           }`}
         >
@@ -188,8 +188,8 @@ const Index = () => {
           onClick={() => navigateSection('down')}
           disabled={currentSection === sections.length - 1}
           className={`w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-all duration-300 ${
-            currentSection === sections.length - 1 
-              ? 'opacity-50 cursor-not-allowed' 
+            currentSection === sections.length - 1
+              ? 'opacity-50 cursor-not-allowed'
               : 'hover:bg-white/30 hover:scale-110'
           }`}
         >

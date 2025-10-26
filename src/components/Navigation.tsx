@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 // ...existing code...
-import { Leaf, ShoppingCart, Menu, X } from "lucide-react";
+import { Leaf, ShoppingCart, Menu, X, Bot } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
@@ -44,6 +44,10 @@ const Navigation = () => {
         <div className="hidden md:flex items-center space-x-4">
           <Link to="/products" className="text-sm text-gray-600 hover:text-green-600 transition-colors">Products</Link>
           <Link to="/gallery" className="text-sm text-gray-600 hover:text-green-600 transition-colors">Gallery</Link>
+          <Link to="/ai" className="text-sm text-gray-600 hover:text-green-600 transition-colors flex items-center">
+            <Bot className="h-4 w-4 mr-1" />
+            AI Assistant
+          </Link>
           <button onClick={() => handleNavigation("features")} className="text-sm text-gray-600 hover:text-green-600 transition-colors">Features</button>
           <Link to="/farm-visit" className="text-sm text-gray-600 hover:text-green-600 transition-colors">Farm Visit</Link>
           <button onClick={() => handleNavigation("contact")} className="text-sm text-gray-600 hover:text-green-600 transition-colors">Contact</button>
@@ -108,6 +112,14 @@ const Navigation = () => {
               onClick={() => setMobileMenuOpen(false)}
             >
               Gallery
+            </Link>
+            <Link 
+              to="/ai" 
+              className="text-gray-600 hover:text-green-600 py-2 flex items-center"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Bot className="h-4 w-4 mr-2" />
+              AI Assistant
             </Link>
             <button 
               onClick={() => handleNavigation("features")}

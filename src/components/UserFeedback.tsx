@@ -39,7 +39,7 @@ const UserFeedbackComponent: React.FC = () => {
     try {
       const res = await apiService.getUserFeedback(user.id);
       if (res.data) {
-        const feedbackArr = (res.data as any).data || [];
+        const feedbackArr = res.data || [];
         setFeedback(feedbackArr as UserFeedback[]);
       }
     } catch (error) {

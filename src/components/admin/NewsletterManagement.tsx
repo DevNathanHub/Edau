@@ -23,7 +23,7 @@ const NewsletterManagement: React.FC = () => {
     setError("");
     const res = await apiService.getNewsletterSubscribers();
     if (res.error) setError(res.error);
-    const subsArr = (res.data && (res.data as any).data) || [];
+    const subsArr = res.data || [];
     setSubscribers(subsArr as NewsletterSubscriber[]);
     setLoading(false);
   };

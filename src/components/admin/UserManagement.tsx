@@ -103,7 +103,7 @@ const UserManagement: React.FC = () => {
         return;
       }
 
-      const usersArr = (res.data && (res.data as any).data) || [];
+      const usersArr = res.data || [];
       const extendedUsers: ExtendedUser[] = (usersArr as User[]).map(user => ({
         ...user,
         role: (user as any).role || 'user',

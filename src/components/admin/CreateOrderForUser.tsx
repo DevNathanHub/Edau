@@ -41,7 +41,7 @@ const CreateOrderForUser: React.FC = () => {
   const fetchUsers = async () => {
     const res = await apiService.getUsers();
     if (res.data) {
-      const usersArr = (res.data as any).data || res.data;
+      const usersArr = res.data || [];
       setUsers(Array.isArray(usersArr) ? usersArr : []);
     }
   };
@@ -49,7 +49,7 @@ const CreateOrderForUser: React.FC = () => {
   const fetchProducts = async () => {
     const res = await apiService.getProducts();
     if (res.data) {
-      const productsArr = (res.data as any).data || res.data;
+      const productsArr = res.data || [];
       setProducts(Array.isArray(productsArr) ? productsArr : []);
     }
   };

@@ -50,7 +50,7 @@ const OrderManagement: React.FC = () => {
     setError("");
     const res = await apiService.getOrders();
     if (res.error) setError(res.error);
-    const ordersArr = (res.data && (res.data as any).data) || [];
+    const ordersArr = res.data || [];
     setOrders(ordersArr as Order[]);
     setLoading(false);
   };
@@ -58,7 +58,7 @@ const OrderManagement: React.FC = () => {
   const fetchUsers = async () => {
     const res = await apiService.getUsers();
     if (res.data) {
-      const usersArr = (res.data as any).data || [];
+      const usersArr = (res.data as any[]) || [];
       setUsers(usersArr);
     }
   };

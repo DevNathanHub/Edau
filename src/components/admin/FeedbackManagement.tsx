@@ -23,7 +23,7 @@ const FeedbackManagement: React.FC = () => {
     setError("");
     const res = await apiService.getFeedback();
     if (res.error) setError(res.error);
-    const feedbackArr = (res.data && (res.data as any).data) || [];
+    const feedbackArr = res.data || [];
     setFeedback(feedbackArr as UserFeedback[]);
     setFilteredFeedback(feedbackArr as UserFeedback[]);
     setLoading(false);

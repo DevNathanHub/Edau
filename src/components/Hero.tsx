@@ -119,7 +119,7 @@ const Hero = () => {
 
   if (galleryImages.length === 0) {
     return (
-      <section className="min-h-screen flex items-center py-16 md:py-24 bg-gradient-to-b from-[#FFF8E1] to-white relative overflow-hidden">
+      <section className="h-full flex items-center bg-gradient-to-b from-[#FFF8E1] to-white relative overflow-hidden">
         <div className="container mx-auto px-4 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading farm gallery...</p>
@@ -129,7 +129,7 @@ const Hero = () => {
   }
 
   return (
-    <section className="min-h-screen flex items-center py-16 md:py-24 bg-gradient-to-b from-[#8B4513] via-[#A0522D] to-[#FFF8E1] relative overflow-hidden">
+    <section className="h-full flex items-center bg-gradient-to-b from-[#8B4513] via-[#A0522D] to-[#FFF8E1] relative overflow-hidden">
       {/* Authentic Farm Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Acacia tree silhouettes */}
@@ -169,11 +169,11 @@ const Hero = () => {
               </div>
               <span className="text-amber-800 font-semibold text-lg">Edau Farm - West Pokot</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4 text-gray-800">
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4 text-white">
               From West Pokot Soil <br />
-              <span className="text-amber-700">to Your Table</span>
+              <span className="text-amber-300">to Your Table</span>
             </h1>
-            <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+            <p className="text-lg text-white mb-6 leading-relaxed">
               Experience the authentic flavors of West Pokot through our Acacia honey, heritage-bred livestock,
               seasonal fruits, and free-range poultry — raised with traditional wisdom and modern care.
             </p>

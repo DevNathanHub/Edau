@@ -33,7 +33,7 @@ const AIChatSection = () => {
   ];
 
   return (
-    <section id="ai-chat" className="min-h-screen flex items-center py-16 bg-gradient-to-r from-[#FFF8E1] to-[#81C784]/10 relative">
+    <section id="ai-chat" className="h-full flex items-center bg-gradient-to-r from-[#FFF8E1] to-[#81C784]/10 relative">
       {/* Honeycomb background pattern */}
       <div className="absolute inset-0 opacity-5">
         <img 

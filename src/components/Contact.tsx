@@ -137,7 +137,7 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-16 bg-amber-50">
+    <section id="contact" className="h-full flex items-center bg-amber-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">Get in Touch</h2>

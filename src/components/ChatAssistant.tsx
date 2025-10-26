@@ -35,6 +35,7 @@ const ChatAssistant = () => {
   const [totalTokensUsed, setTotalTokensUsed] = useState(0);
   const [products, setProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
+  const [isBouncing, setIsBouncing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
@@ -104,6 +105,22 @@ const ChatAssistant = () => {
   useEffect(() => {
     scrollToBottom();
   }, [currentConversation?.messages]);
+
+  // Handle external trigger for chat opening with bounce animation
+  useEffect(() => {
+    const handleChatTrigger = () => {
+      setIsBouncing(true);
+      setOpen(true);
+      // Reset bounce after animation
+      setTimeout(() => setIsBouncing(false), 1000);
+    };
+
+    const chatTrigger = document.querySelector('[data-chat-trigger]');
+    if (chatTrigger) {
+      chatTrigger.addEventListener('click', handleChatTrigger);
+      return () => chatTrigger.removeEventListener('click', handleChatTrigger);
+    }
+  }, []);
 
   useEffect(() => {
     if (open && user) {
@@ -637,9 +654,14 @@ const ChatAssistant = () => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <div className="fixed bottom-20 right-4 z-50">
+        <div className="fixed bottom-20 right-4 z-50" data-chat-trigger>
           <div className="relative">
-            <Button className="h-12 w-12 rounded-full shadow-lg bg-[#4CAF50] hover:bg-[#388E3C] relative" size="icon">
+            <Button 
+              className={`h-12 w-12 rounded-full shadow-lg bg-[#4CAF50] hover:bg-[#388E3C] relative transition-all duration-300 ${
+                isBouncing ? 'animate-bounce scale-110' : ''
+              }`} 
+              size="icon"
+            >
               <Bot className="h-6 w-6" />
             </Button>
             {/* Ask AI? tag */}

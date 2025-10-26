@@ -200,22 +200,22 @@ const Index = () => {
       <Navigation />
       <main className="snap-y snap-mandatory overflow-y-auto h-screen">
         {/* Hero Section */}
-        <section id="hero" className="h-screen snap-start">
+        <section id="hero" className="min-h-screen snap-start">
           <Hero />
         </section>
 
         {/* Features Section */}
-        <section id="features" className="h-screen snap-start flex items-center">
+        <section id="features" className="min-h-screen snap-start flex items-center">
           <Features />
         </section>
 
         {/* AI Chat Section */}
-        <section id="ai-chat" className="h-screen snap-start flex items-center">
+        <section id="ai-chat" className="min-h-screen snap-start flex items-center">
           <AIChatSection />
         </section>
 
         {/* Statistics Section */}
-        <section id="statistics" className="h-screen snap-start flex items-center bg-gradient-to-br from-amber-900 via-red-900 to-amber-800 text-white relative">
+        <section id="statistics" className="min-h-screen snap-start flex items-center bg-gradient-to-br from-amber-900 via-red-900 to-amber-800 text-white relative">
           {/* Authentic Maasai patterns background */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -256,7 +256,7 @@ const Index = () => {
         </section>
 
         {/* Special Offers Section */}
-        <section id="offers" className="h-screen snap-start flex items-center bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 relative">
+        <section id="offers" className="min-h-screen snap-start flex items-center bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 relative">
           {/* Traditional farm tools pattern */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0" style={{
@@ -337,7 +337,7 @@ const Index = () => {
         </section>
 
         {/* Testimonials Section */}
-        <section id="testimonials" className="h-screen snap-start flex items-center bg-gradient-to-br from-green-900 via-emerald-900 to-green-800 relative">
+        <section id="testimonials" className="min-h-screen snap-start flex items-center bg-gradient-to-br from-green-900 via-emerald-900 to-green-800 relative">
           {/* Acacia tree silhouettes */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -421,7 +421,7 @@ const Index = () => {
         </section>
 
         {/* Farm Gallery Section */}
-        <section id="gallery" className="h-screen snap-start flex items-center bg-gradient-to-br from-amber-100 via-yellow-50 to-orange-100 relative">
+        <section id="gallery" className="min-h-screen snap-start flex items-center bg-gradient-to-br from-amber-100 via-yellow-50 to-orange-100 relative">
           {/* Honeycomb pattern with earth tones */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -505,7 +505,7 @@ const Index = () => {
         </section>
 
         {/* Why Choose Us Section */}
-        <section id="why-choose" className="h-screen snap-start flex items-center bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 text-white relative">
+        <section id="why-choose" className="min-h-screen snap-start flex items-center bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 text-white relative">
           {/* Maasai shield pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -556,7 +556,7 @@ const Index = () => {
         </section>
 
         {/* Farm Story Section */}
-        <section id="story" className="h-screen snap-start flex items-center bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 relative">
+        <section id="story" className="min-h-screen snap-start flex items-center bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 relative">
           {/* Traditional West Pokot patterns */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0" style={{
@@ -627,7 +627,7 @@ const Index = () => {
         </section>
 
         {/* Contact Section */}
-        <section id="contact" className="h-screen snap-start">
+        <section id="contact" className="min-h-screen snap-start">
           <Contact />
         </section>
       </main>

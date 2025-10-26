@@ -54,7 +54,7 @@ const productsList = [
 
 const Features = () => {
   return (
-    <section id="features" className="h-full flex items-center bg-[#FFF8E1] relative">
+    <section id="features" className="h-screen-mobile md:h-screen flex items-center bg-[#FFF8E1] relative">
       {/* Honeycomb background pattern */}
       <div className="absolute inset-0 opacity-5">
         <img 

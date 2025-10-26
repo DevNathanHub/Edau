@@ -9,6 +9,7 @@ export interface User {
   last_name?: string;
   phone?: string;
   address?: string;
+  avatar?: string;
   created_at?: Date;
   updated_at?: Date;
 }

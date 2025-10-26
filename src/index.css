@@ -98,6 +98,11 @@
 }
 
 @layer base {
+  :root {
+    /* Mobile viewport height fix */
+    --vh: 1vh;
+  }
+
   * {
     @apply border-border;
   }
@@ -105,6 +110,17 @@
   body {
     @apply bg-background text-foreground font-['Poppins'];
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    /* Set custom property for mobile viewport height */
+    --vh: 1vh;
+  }
+
+  /* Mobile viewport height fix */
+  .h-screen-mobile {
+    height: calc(var(--vh, 1vh) * 100);
+  }
+
+  .min-h-screen-mobile {
+    min-height: calc(var(--vh, 1vh) * 100);
   }
 
   /* Custom scrollbar */

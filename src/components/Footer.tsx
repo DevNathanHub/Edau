@@ -2,13 +2,19 @@
 import { Leaf, Mail, Calendar, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const Footer = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
+  const location = useLocation();
+  
+  // Hide footer on dashboard routes
+  if (location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin')) {
+    return null;
+  }
   
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();

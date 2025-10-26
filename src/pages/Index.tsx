@@ -6,7 +6,7 @@ import AIChatSection from "../components/AIChatSection";
 import Contact from "../components/Contact";
 import Footer from "../components/Footer";
 import { Button } from "@/components/ui/button";
-import { HeartHandshake, Calendar, Users, Star, Award, Truck, Shield, CheckCircle, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { HeartHandshake, Calendar, Users, Star, Award, Truck, Shield, CheckCircle, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useState, useEffect } from "react";
@@ -21,21 +21,6 @@ const Index = () => {
     viewGallery: false,
     meetTeam: false
   });
-  const [currentSection, setCurrentSection] = useState(0);
-  const [isScrolling, setIsScrolling] = useState(false);
-
-  const sections = [
-    { id: 'hero', name: 'Home' },
-    { id: 'features', name: 'Features' },
-    { id: 'ai-chat', name: 'AI Assistant' },
-    { id: 'statistics', name: 'Our Impact' },
-    { id: 'offers', name: 'Special Offers' },
-    { id: 'testimonials', name: 'Testimonials' },
-    { id: 'gallery', name: 'Farm Gallery' },
-    { id: 'why-choose', name: 'Why Choose Us' },
-    { id: 'story', name: 'Our Story' },
-    { id: 'contact', name: 'Contact' }
-  ];
 
   const handleButtonClick = async (buttonType: keyof typeof buttonStates, action: () => void | Promise<void>, delay = 800) => {
     setButtonStates(prev => ({ ...prev, [buttonType]: true }));
@@ -51,92 +36,39 @@ const Index = () => {
     }
   };
 
-  // Handle scroll navigation
+    // Handle mobile viewport height
   useEffect(() => {
-    const handleScroll = (e: WheelEvent) => {
-      if (isScrolling) return;
-      
-      const direction = e.deltaY > 0 ? 1 : -1;
-      const nextSection = Math.max(0, Math.min(sections.length - 1, currentSection + direction));
-      
-      if (nextSection !== currentSection) {
-        e.preventDefault();
-        scrollToSection(sections[nextSection].id, nextSection);
-      }
+    const setVh = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
     };
 
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (isScrolling) return;
-      
-      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
-        e.preventDefault();
-        const nextSection = Math.min(sections.length - 1, currentSection + 1);
-        scrollToSection(sections[nextSection].id, nextSection);
-      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
-        e.preventDefault();
-        const prevSection = Math.max(0, currentSection - 1);
-        scrollToSection(sections[prevSection].id, prevSection);
-      }
-    };
-
-    // Intersection Observer to track current section
-    const observerOptions = {
-      root: null,
-      rootMargin: '-50% 0px -50% 0px',
-      threshold: 0
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const sectionIndex = sections.findIndex(section => section.id === entry.target.id);
-          if (sectionIndex !== -1) {
-            setCurrentSection(sectionIndex);
-          }
-        }
-      });
-    }, observerOptions);
-
-    // Observe all sections
-    sections.forEach(section => {
-      const element = document.getElementById(section.id);
-      if (element) observer.observe(element);
-    });
-
-    window.addEventListener('wheel', handleScroll, { passive: false });
-    window.addEventListener('keydown', handleKeyPress);
+    setVh();
+    window.addEventListener('resize', setVh);
+    window.addEventListener('orientationchange', setVh);
 
     return () => {
-      window.removeEventListener('wheel', handleScroll);
-      window.removeEventListener('keydown', handleKeyPress);
-      observer.disconnect();
+      window.removeEventListener('resize', setVh);
+      window.removeEventListener('orientationchange', setVh);
     };
-  }, [currentSection, isScrolling]);
+  }, []);
 
-  const scrollToSection = (sectionId: string, sectionIndex?: number) => {
-    setIsScrolling(true);
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
-      
-      if (sectionIndex !== undefined) {
-        setCurrentSection(sectionIndex);
-      }
-    }
-    
-    setTimeout(() => setIsScrolling(false), 1000);
-  };
+  // Handle mobile viewport height
+  useEffect(() => {
+    const setVh = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
 
-  const navigateSection = (direction: 'up' | 'down') => {
-    const nextSection = direction === 'down' 
-      ? Math.min(sections.length - 1, currentSection + 1)
-      : Math.max(0, currentSection - 1);
-    
-    scrollToSection(sections[nextSection].id, nextSection);
-  };
+    setVh();
+    window.addEventListener('resize', setVh);
+    window.addEventListener('orientationchange', setVh);
+
+    return () => {
+      window.removeEventListener('resize', setVh);
+      window.removeEventListener('orientationchange', setVh);
+    };
+  }, []);
 
   return (
     <div className="relative">
@@ -155,67 +87,25 @@ const Index = () => {
         <link rel="canonical" href="https://edau.loopnet.tech" />
       </Helmet>
 
-      {/* Section Navigation */}
-      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-50 hidden md:flex">
-        <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-full p-3 flex flex-col space-y-2">
-          {sections.map((section, index) => (
-            <button
-              key={section.id}
-              onClick={() => scrollToSection(section.id, index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === currentSection
-                  ? 'bg-amber-600 scale-125'
-                  : 'bg-white/50 hover:bg-white/75'
-              }`}
-              title={section.name}
-            />
-          ))}
-        </div>
-      </div>      {/* Navigation arrows */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col space-y-2">
-        <button
-          onClick={() => navigateSection('up')}
-          disabled={currentSection === 0}
-          className={`w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-all duration-300 ${
-            currentSection === 0
-              ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-white/30 hover:scale-110'
-          }`}
-        >
-          <ChevronUp className="h-5 w-5 text-white" />
-        </button>
-        <button
-          onClick={() => navigateSection('down')}
-          disabled={currentSection === sections.length - 1}
-          className={`w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-all duration-300 ${
-            currentSection === sections.length - 1
-              ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-white/30 hover:scale-110'
-          }`}
-        >
-          <ChevronDown className="h-5 w-5 text-white" />
-        </button>
-      </div>
-
       <Navigation />
-      <main className="snap-y snap-mandatory overflow-y-auto h-screen">
+      <main className="overflow-y-auto">
         {/* Hero Section */}
-        <section id="hero" className="min-h-screen snap-start">
+        <section id="hero" className="py-16 md:py-24">
           <Hero />
         </section>
 
         {/* Features Section */}
-        <section id="features" className="min-h-screen snap-start flex items-center">
+        <section id="features" className="py-16 md:py-24">
           <Features />
         </section>
 
         {/* AI Chat Section */}
-        <section id="ai-chat" className="min-h-screen snap-start flex items-center">
+        <section id="ai-chat" className="py-16 md:py-24">
           <AIChatSection />
         </section>
 
         {/* Statistics Section */}
-        <section id="statistics" className="min-h-screen snap-start flex items-center bg-gradient-to-br from-amber-900 via-red-900 to-amber-800 text-white relative">
+        <section id="statistics" className="py-16 md:py-24 bg-gradient-to-br from-amber-900 via-red-900 to-amber-800 text-white relative">
           {/* Authentic Maasai patterns background */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -256,7 +146,7 @@ const Index = () => {
         </section>
 
         {/* Special Offers Section */}
-        <section id="offers" className="min-h-screen snap-start flex items-center bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 relative">
+        <section id="offers" className="py-16 md:py-24 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 relative">
           {/* Traditional farm tools pattern */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0" style={{
@@ -337,7 +227,7 @@ const Index = () => {
         </section>
 
         {/* Testimonials Section */}
-        <section id="testimonials" className="min-h-screen snap-start flex items-center bg-gradient-to-br from-green-900 via-emerald-900 to-green-800 relative">
+        <section id="testimonials" className="py-16 md:py-24 bg-gradient-to-br from-green-900 via-emerald-900 to-green-800 relative">
           {/* Acacia tree silhouettes */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -421,7 +311,7 @@ const Index = () => {
         </section>
 
         {/* Farm Gallery Section */}
-        <section id="gallery" className="min-h-screen snap-start flex items-center bg-gradient-to-br from-amber-100 via-yellow-50 to-orange-100 relative">
+        <section id="gallery" className="py-16 md:py-24 bg-gradient-to-br from-amber-100 via-yellow-50 to-orange-100 relative">
           {/* Honeycomb pattern with earth tones */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -505,7 +395,7 @@ const Index = () => {
         </section>
 
         {/* Why Choose Us Section */}
-        <section id="why-choose" className="min-h-screen snap-start flex items-center bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 text-white relative">
+        <section id="why-choose" className="py-16 md:py-24 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 text-white relative">
           {/* Maasai shield pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -556,7 +446,7 @@ const Index = () => {
         </section>
 
         {/* Farm Story Section */}
-        <section id="story" className="min-h-screen snap-start flex items-center bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 relative">
+        <section id="story" className="py-16 md:py-24 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 relative">
           {/* Traditional West Pokot patterns */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0" style={{
@@ -627,7 +517,7 @@ const Index = () => {
         </section>
 
         {/* Contact Section */}
-        <section id="contact" className="min-h-screen snap-start">
+        <section id="contact" className="py-16 md:py-24">
           <Contact />
         </section>
       </main>

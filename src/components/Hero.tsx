@@ -129,7 +129,7 @@ const Hero = () => {
   }
 
   return (
-    <section className="h-full flex items-center bg-gradient-to-b from-[#8B4513] via-[#A0522D] to-[#FFF8E1] relative overflow-hidden">
+    <section className="h-screen-mobile md:h-screen flex items-center bg-gradient-to-b from-[#8B4513] via-[#A0522D] to-[#FFF8E1] relative overflow-hidden">
       {/* Authentic Farm Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Acacia tree silhouettes */}

@@ -2,7 +2,6 @@
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import Navigation from "./Navigation";
-import Footer from "./Footer";
 import { Button } from "./ui/button";
 import { ChevronLeft, ChevronRight, Menu } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -30,12 +29,12 @@ const DashboardLayout = ({ children, sidebar, title }: DashboardLayoutProps) => 
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <Navigation />
       
-      <div className="flex-1 flex flex-col lg:flex-row">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Mobile sidebar toggle button */}
-        <div className="lg:hidden p-4 flex items-center justify-between bg-white border-b border-gray-200">
+        <div className="lg:hidden p-4 flex items-center justify-between bg-white border-b border-gray-200 flex-shrink-0">
           <h1 className="text-xl font-semibold">{title}</h1>
           <Button 
             variant="ghost" 
@@ -64,7 +63,7 @@ const DashboardLayout = ({ children, sidebar, title }: DashboardLayoutProps) => 
           {/* Sidebar content */}
           <div 
             className={cn(
-              "relative flex-1 flex flex-col max-w-xs w-full bg-white border-r border-gray-200 transition-all duration-200 ease-in-out",
+              "relative flex-1 flex flex-col max-w-xs w-full bg-white border-r border-gray-200 transition-all duration-200 ease-in-out lg:h-full",
               isSidebarCollapsed && "lg:max-w-[4.5rem]",
               "lg:max-w-[16rem]"
             )}
@@ -112,19 +111,17 @@ const DashboardLayout = ({ children, sidebar, title }: DashboardLayoutProps) => 
         </div>
         
         {/* Main content */}
-        <main className="flex-1 pb-[60px] lg:pb-0 overflow-x-hidden">
+        <main className="flex-1 flex flex-col overflow-hidden">
           {/* Desktop title */}
-          <div className="hidden lg:block p-6 pb-0">
+          <div className="hidden lg:block p-6 pb-0 flex-shrink-0">
             <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
           </div>
           
-          <div className="px-4 py-6 lg:px-6">
+          <div className="flex-1 overflow-y-auto px-4 py-6 lg:px-6">
             {children}
           </div>
         </main>
       </div>
-      
-      <Footer />
     </div>
   );
 };

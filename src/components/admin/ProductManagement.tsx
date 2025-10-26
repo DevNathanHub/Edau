@@ -81,12 +81,41 @@ const ProductManagement: React.FC = () => {
       console.log('ProductManagement: Fetching categories');
       const res = await apiService.getCategories() as { data?: any; error?: string };
       console.log('ProductManagement: Categories API response:', res);
-      const categoriesArr = (res.data as any)?.data || [];
+      
+      let categoriesArr = [];
+      if (res.data && Array.isArray(res.data)) {
+        categoriesArr = res.data;
+      } else if (res.data && res.data.data && Array.isArray(res.data.data)) {
+        categoriesArr = res.data.data;
+      } else if (res.data && typeof res.data === 'object' && res.data.data) {
+        categoriesArr = Array.isArray(res.data.data) ? res.data.data : [];
+      }
+      
       console.log('ProductManagement: Categories array:', categoriesArr);
+      
+      // If no categories from API, use default categories
+      if (!categoriesArr || categoriesArr.length === 0) {
+        categoriesArr = [
+          { id: 'honey', name: 'Honey' },
+          { id: 'sheep', name: 'Dorper Sheep' },
+          { id: 'fruits', name: 'Fruits' },
+          { id: 'poultry', name: 'Poultry' }
+        ];
+        console.log('ProductManagement: Using default categories:', categoriesArr);
+      }
+      
       setCategories(Array.isArray(categoriesArr) ? categoriesArr : []);
     } catch (error) {
       console.error('ProductManagement: Error fetching categories:', error);
-      setCategories([]);
+      // Use default categories on error
+      const defaultCategories = [
+        { id: 'honey', name: 'Honey' },
+        { id: 'sheep', name: 'Dorper Sheep' },
+        { id: 'fruits', name: 'Fruits' },
+        { id: 'poultry', name: 'Poultry' }
+      ];
+      setCategories(defaultCategories);
+      console.log('ProductManagement: Using default categories due to error:', defaultCategories);
     }
   };
 
@@ -123,7 +152,7 @@ const ProductManagement: React.FC = () => {
       name: "",
       price: 0,
       stock: 0,
-      category: categories.length > 0 ? (categories[0].name as Product['category']) : undefined,
+      category: categories.length > 0 ? (categories[0].name as Product['category']) : "Honey" as Product['category'],
       unit: "",
       availability: true,
       tags: [],
@@ -138,7 +167,7 @@ const ProductManagement: React.FC = () => {
       name: "",
       price: 0,
       stock: 0,
-      category: categories.length > 0 ? (categories[0].name as Product['category']) : undefined,
+      category: categories.length > 0 ? (categories[0].name as Product['category']) : "Honey" as Product['category'],
       unit: "",
       availability: true,
       tags: [],

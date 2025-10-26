@@ -98,10 +98,63 @@ interface Product {
 
 // Function to fetch products from backend API
 const fetchProducts = async (): Promise<Product[]> => {
+  // Check for cached products first
+  const cachedProducts = localStorage.getItem('edau_products_cache');
+  const cacheTimestamp = localStorage.getItem('edau_products_cache_timestamp');
+  
+  const isCacheValid = cachedProducts && cacheTimestamp && 
+    (Date.now() - parseInt(cacheTimestamp)) < 24 * 60 * 60 * 1000; // 24 hours
+  
+  if (isCacheValid) {
+    console.log('Products: Using cached products');
+    const cachedData = JSON.parse(cachedProducts);
+    // Process cached data the same way as fresh data
+    const list = cachedData?.data || cachedData || [];
+    return (list as any[]).map((product: any) => {
+      const base: Product = {
+        id: product.id || product._id || product._id?.toString?.(),
+        name: product.name,
+        price: Number(product.price || 0),
+        description: product.description || '',
+        image_url: product.image_url || product.image || '',
+        stock: Number(product.stock ?? 10),
+        category: product.category || undefined,
+      };
+
+      // If category is already set from backend, use it
+      if (base.category) {
+        // Normalize category to match filter values
+        const cat = base.category.toLowerCase();
+        if (cat.includes('honey')) return { ...base, category: 'honey' };
+        if (cat.includes('sheep') || cat.includes('dorper')) return { ...base, category: 'sheep' };
+        if (cat.includes('fruit')) return { ...base, category: 'fruits' };
+        if (cat.includes('poultry') || cat.includes('chicken') || cat.includes('egg')) return { ...base, category: 'poultry' };
+        return { ...base, category: base.category.toLowerCase() };
+      }
+
+      // Otherwise, assign category based on name matching
+      let category = 'poultry'; // default
+      const lower = (base.name || '').toLowerCase();
+      if (lower.includes('honey')) category = 'honey';
+      else if (lower.includes('sheep') || lower.includes('dorper') || lower.includes('lamb')) category = 'sheep';
+      else if (lower.includes('fruit') || lower.includes('apple') || lower.includes('peach') || lower.includes('orange')) category = 'fruits';
+      else if (lower.includes('chicken') || lower.includes('egg') || lower.includes('poultry')) category = 'poultry';
+
+      return { ...base, category };
+    });
+  }
+
+  // Fetch fresh data if no valid cache
+  console.log('Products: Fetching fresh products from API');
   const result = await apiService.getProducts();
   if (result.error) throw new Error(result.error);
   const payload: any = result.data;
   const list = payload?.data || payload || [];
+  
+  // Cache the fresh data
+  localStorage.setItem('edau_products_cache', JSON.stringify(result.data));
+  localStorage.setItem('edau_products_cache_timestamp', Date.now().toString());
+  
   // Assign categories based on name for icon display
   return (list as any[]).map((product: any) => {
     const base: Product = {

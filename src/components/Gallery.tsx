@@ -40,6 +40,25 @@ const Gallery = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [columnCount, setColumnCount] = useState(3);
+  
+  // Responsive column count
+  useEffect(() => {
+    const updateColumnCount = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setColumnCount(1); // Mobile: 1 column for larger images
+      } else if (width < 1024) {
+        setColumnCount(2); // Tablet: 2 columns
+      } else {
+        setColumnCount(3); // Desktop: 3 columns
+      }
+    };
+
+    updateColumnCount();
+    window.addEventListener('resize', updateColumnCount);
+    return () => window.removeEventListener('resize', updateColumnCount);
+  }, []);
   
   // Fetch gallery images
   const { data: galleryImages = [], isLoading, error, refetch } = useQuery<GalleryImage[]>({
@@ -243,7 +262,7 @@ const Gallery = () => {
           )}
         </div>
       ) : (
-        <MasonryLayout columnCount={3} gap={20}>
+        <MasonryLayout columnCount={columnCount} gap={20}>
           {galleryImages.map((image) => (
             <Card key={image.id || image._id} className="overflow-hidden group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-0 shadow-md">
               <Dialog>

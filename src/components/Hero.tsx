@@ -3,24 +3,78 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Leaf, User, MessageCircle, Zap, ShoppingCart, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useQuery } from '@tanstack/react-query';
+import { apiService } from '@/lib/api';
+
+interface GalleryImage {
+  id: string;
+  _id?: string;
+  url: string;
+  public_id: string;
+  original_name: string;
+  uploaded_by?: string;
+  created_at: string;
+  isPublic?: boolean;
+}
 
 const Hero = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [transitionType, setTransitionType] = useState<'fade' | 'slide' | 'zoom' | 'rotate'>('fade');
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const heroImages = [
-    "https://res.cloudinary.com/dt05sixza/image/upload/v1761432130/edau_gallery/l391lo21ecais2upig2k.jpg",
-    "https://res.cloudinary.com/dt05sixza/image/upload/v1761431588/edau_gallery/dfhnrsmuteqhheghiema.jpg",
-    "https://res.cloudinary.com/dt05sixza/image/upload/v1761432064/edau_gallery/gzmlkw1evm17yrynuphm.jpg",
-    "https://res.cloudinary.com/dt05sixza/image/upload/v1761432109/edau_gallery/tb0utizepynaszqajuu6.jpg"
-  ];
+  // Fetch gallery images for hero carousel
+  const { data: galleryImages = [] } = useQuery<GalleryImage[]>({
+    queryKey: ['heroGalleryImages'],
+    queryFn: async (): Promise<GalleryImage[]> => {
+      try {
+        const response = await apiService.getGallery();
+        if (response.error) {
+          // Fallback to hardcoded images if API fails
+          return [
+            { id: '1', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432130/edau_gallery/l391lo21ecais2upig2k.jpg", public_id: "l391lo21ecais2upig2k", original_name: "Farm Landscape", created_at: new Date().toISOString() },
+            { id: '2', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761431588/edau_gallery/dfhnrsmuteqhheghiema.jpg", public_id: "dfhnrsmuteqhheghiema", original_name: "Produce Display", created_at: new Date().toISOString() },
+            { id: '3', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432064/edau_gallery/gzmlkw1evm17yrynuphm.jpg", public_id: "gzmlkw1evm17yrynuphm", original_name: "Animal Husbandry", created_at: new Date().toISOString() },
+            { id: '4', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432109/edau_gallery/tb0utizepynaszqajuu6.jpg", public_id: "tb0utizepynaszqajuu6", original_name: "Honey Production", created_at: new Date().toISOString() },
+            { id: '5', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432088/edau_gallery/q0iexqygkurq4b6xi2wt.jpg", public_id: "q0iexqygkurq4b6xi2wt", original_name: "Community Farming", created_at: new Date().toISOString() }
+          ];
+        }
+        // Take up to 8 random images from gallery
+        const images = (response.data as GalleryImage[]) || [];
+        const shuffled = images.sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, Math.min(8, images.length));
+      } catch (error) {
+        // Fallback images
+        return [
+          { id: '1', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432130/edau_gallery/l391lo21ecais2upig2k.jpg", public_id: "l391lo21ecais2upig2k", original_name: "Farm Landscape", created_at: new Date().toISOString() },
+          { id: '2', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761431588/edau_gallery/dfhnrsmuteqhheghiema.jpg", public_id: "dfhnrsmuteqhheghiema", original_name: "Produce Display", created_at: new Date().toISOString() },
+          { id: '3', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432064/edau_gallery/gzmlkw1evm17yrynuphm.jpg", public_id: "gzmlkw1evm17yrynuphm", original_name: "Animal Husbandry", created_at: new Date().toISOString() },
+          { id: '4', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432109/edau_gallery/tb0utizepynaszqajuu6.jpg", public_id: "tb0utizepynaszqajuu6", original_name: "Honey Production", created_at: new Date().toISOString() },
+          { id: '5', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432088/edau_gallery/q0iexqygkurq4b6xi2wt.jpg", public_id: "q0iexqygkurq4b6xi2wt", original_name: "Community Farming", created_at: new Date().toISOString() }
+        ];
+      }
+    },
+    enabled: true,
+  });
+
+  const transitionTypes: ('fade' | 'slide' | 'zoom' | 'rotate')[] = ['fade', 'slide', 'zoom', 'rotate'];
 
   useEffect(() => {
+    if (galleryImages.length === 0) return;
+
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
-    }, 4000); // Change image every 4 seconds
+      setIsTransitioning(true);
+      
+      // Change transition type randomly
+      setTransitionType(transitionTypes[Math.floor(Math.random() * transitionTypes.length)]);
+      
+      setTimeout(() => {
+        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % galleryImages.length);
+        setIsTransitioning(false);
+      }, 300);
+    }, 5000); // Change image every 5 seconds
 
     return () => clearInterval(interval);
-  }, [heroImages.length]);
+  }, [galleryImages.length]);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -29,85 +83,132 @@ const Hero = () => {
     }
   };
 
+  const getTransitionClasses = (index: number) => {
+    const isActive = index === currentImageIndex;
+    const baseClasses = "absolute inset-0 transition-all duration-1000 ease-in-out";
+    
+    if (!isActive) return `${baseClasses} opacity-0`;
+    
+    switch (transitionType) {
+      case 'slide':
+        return `${baseClasses} opacity-100 transform translate-x-0`;
+      case 'zoom':
+        return `${baseClasses} opacity-100 transform scale-100`;
+      case 'rotate':
+        return `${baseClasses} opacity-100 transform rotate-0`;
+      default:
+        return `${baseClasses} opacity-100`;
+    }
+  };
+
+  const getInactiveTransitionClasses = (index: number) => {
+    const isActive = index === currentImageIndex;
+    if (isActive) return "";
+    
+    switch (transitionType) {
+      case 'slide':
+        return "transform -translate-x-full";
+      case 'zoom':
+        return "transform scale-110";
+      case 'rotate':
+        return "transform rotate-3";
+      default:
+        return "";
+    }
+  };
+
+  if (galleryImages.length === 0) {
+    return (
+      <section className="min-h-screen flex items-center py-16 md:py-24 bg-gradient-to-b from-[#FFF8E1] to-white relative overflow-hidden">
+        <div className="container mx-auto px-4 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading farm gallery...</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="min-h-screen flex items-center py-16 md:py-24 bg-gradient-to-b from-[#FFF8E1] to-white relative overflow-hidden">
-      {/* Animated Farm Background */}
+    <section className="min-h-screen flex items-center py-16 md:py-24 bg-gradient-to-b from-[#8B4513] via-[#A0522D] to-[#FFF8E1] relative overflow-hidden">
+      {/* Authentic Farm Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Honeycomb pattern background */}
-        <div className="absolute inset-0 opacity-5">
-          <img 
-            src="/honeycomb.svg" 
-            alt="Honeycomb pattern" 
-            className="w-full h-full object-cover"
-          />
+        {/* Acacia tree silhouettes */}
+        <div className="absolute bottom-0 left-0 w-32 h-48 bg-black/20 transform -scale-x-100" style={{
+          clipPath: 'polygon(20% 100%, 30% 80%, 25% 60%, 35% 40%, 30% 20%, 40% 0%, 60% 0%, 70% 20%, 65% 40%, 75% 60%, 70% 80%, 80% 100%)'
+        }}></div>
+        <div className="absolute bottom-0 right-10 w-28 h-40 bg-black/15" style={{
+          clipPath: 'polygon(20% 100%, 30% 80%, 25% 60%, 35% 40%, 30% 20%, 40% 0%, 60% 0%, 70% 20%, 65% 40%, 75% 60%, 70% 80%, 80% 100%)'
+        }}></div>
+        
+        {/* Maasai shield patterns */}
+        <div className="absolute top-20 left-20 w-16 h-20 border-2 border-amber-600/30 transform rotate-12">
+          <div className="absolute inset-2 border border-amber-600/20"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-amber-600/40 rounded-full"></div>
         </div>
         
-        {/* Animated clouds */}
-        <div className="absolute top-10 left-10 w-20 h-12 bg-white/30 rounded-full animate-float-slow opacity-60"></div>
-        <div className="absolute top-20 right-20 w-16 h-10 bg-white/40 rounded-full animate-float-medium opacity-50"></div>
-        <div className="absolute top-32 left-1/3 w-24 h-14 bg-white/35 rounded-full animate-float-fast opacity-55"></div>
+        {/* Traditional farm tools silhouettes */}
+        <div className="absolute top-32 right-32 w-12 h-16 bg-black/10 transform rotate-45" style={{
+          clipPath: 'polygon(40% 100%, 60% 100%, 50% 0%)'
+        }}></div>
         
-        {/* Animated bees */}
-        <div className="absolute top-40 right-10 animate-bee-flight">
-          <div className="text-2xl animate-bounce">🐝</div>
-        </div>
-        <div className="absolute top-60 left-20 animate-bee-flight-delayed">
-          <div className="text-xl animate-bounce">🐝</div>
-        </div>
+        {/* Subtle earth tones gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-900/10 via-transparent to-green-900/10"></div>
         
-        {/* Floating pollen particles */}
-        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-[#FFC107] rounded-full animate-float-particles opacity-70"></div>
-        <div className="absolute top-1/3 right-1/3 w-1.5 h-1.5 bg-[#FFC107] rounded-full animate-float-particles-delayed opacity-60"></div>
-        <div className="absolute top-1/2 left-1/2 w-2.5 h-2.5 bg-[#FFC107] rounded-full animate-float-particles-slow opacity-50"></div>
-        
-        {/* Subtle animated gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#81C784]/10 via-transparent to-[#4CAF50]/5 animate-gradient-shift"></div>
+        {/* Floating traditional patterns */}
+        <div className="absolute top-1/4 left-1/4 w-3 h-3 border border-amber-600/30 transform rotate-45 animate-pulse"></div>
+        <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-amber-600/20 rounded-full animate-bounce" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-4 h-1 bg-green-600/30 transform -rotate-12 animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
-      <div className="container mx-auto px-4">
+
+      <div className="container mx-auto px-4 relative z-10">
         <div className="flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 md:pr-8 mb-8 md:mb-0">
             <div className="flex items-center mb-4">
-              <Leaf className="h-6 w-6 text-[#4CAF50] mr-2" />
-              <span className="text-[#4CAF50] font-medium">Welcome to Edau Farm - West Pokot</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-amber-600 to-red-600 rounded-full flex items-center justify-center mr-3">
+                <span className="text-white font-bold text-sm">E</span>
+              </div>
+              <span className="text-amber-800 font-semibold text-lg">Edau Farm - West Pokot</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4 text-gray-800">
-              Fresh from West Pokot <br />
-              <span className="text-amber-600">Acacia Honey & More</span>
+              From West Pokot Soil <br />
+              <span className="text-amber-700">to Your Table</span>
             </h1>
-            <p className="text-lg text-gray-600 mb-6">
-              Discover our pure Acacia honey from the rich forests of West Pokot, premium seasonal fruits,
-              Dorper sheep, and free-range poultry — all raised with care on our sustainable farm.
+            <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+              Experience the authentic flavors of West Pokot through our Acacia honey, heritage-bred livestock,
+              seasonal fruits, and free-range poultry — raised with traditional wisdom and modern care.
             </p>
             
-            {/* AI Chat Assistant Highlight */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <div className="flex items-center mb-2">
-                <MessageCircle className="h-5 w-5 text-blue-600 mr-2" />
-                <span className="text-blue-800 font-semibold">Meet Your AI Farm Assistant</span>
+            {/* Authentic Farm Story Highlight */}
+            <div className="bg-gradient-to-r from-amber-50 to-green-50 border border-amber-200 rounded-xl p-6 mb-6 shadow-lg">
+              <div className="flex items-center mb-3">
+                <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center mr-3">
+                  <User className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-amber-900 font-bold">Our AI Farm Assistant</span>
               </div>
-              <p className="text-sm text-blue-700 mb-3">
-                Get instant answers about our products, place orders, book farm visits, and get personalized recommendations — all through our intelligent chat assistant!
+              <p className="text-amber-800 mb-4 leading-relaxed">
+                Meet your digital guide to Edau Farm! Get instant answers about our products, place custom orders,
+                book farm visits, and discover the stories behind our sustainable farming practices.
               </p>
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">24/7 Support</span>
-                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Instant Orders</span>
-                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Expert Advice</span>
+              <div className="flex flex-wrap gap-2 text-sm">
+                <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full border border-amber-200">24/7 Support</span>
+                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full border border-green-200">Local Knowledge</span>
+                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full border border-blue-200">Expert Advice</span>
               </div>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4">
               <Link to="/products">
-                <Button size="lg" className="bg-[#4CAF50] hover:bg-[#388E3C] text-white">
+                <Button size="lg" className="bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200">
                   <ShoppingCart className="mr-2 h-5 w-5" />
-                  Shop Products <ArrowRight className="ml-2 h-5 w-5" />
+                  Explore Our Products <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                className="border-2 border-amber-600 text-amber-700 hover:bg-amber-50 shadow-md transform hover:scale-105 transition-all duration-200"
                 onClick={() => {
-                  // Trigger chat assistant
                   const chatButton = document.querySelector('[data-chat-trigger]');
                   if (chatButton) {
                     (chatButton as HTMLElement).click();
@@ -115,54 +216,83 @@ const Hero = () => {
                 }}
               >
                 <MessageCircle className="mr-2 h-5 w-5" />
-                Ask AI Assistant
+                Ask Our AI Assistant
               </Button>
               <Link to="/farm-visit">
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="border-amber-600 text-amber-600 hover:bg-amber-50"
+                  className="border-2 border-green-600 text-green-700 hover:bg-green-50 shadow-md transform hover:scale-105 transition-all duration-200"
                 >
                   Book Farm Visit
                 </Button>
               </Link>
-             
             </div>
           </div>
-          <div className="md:w-1/2">
-            <div className="relative w-full h-full overflow-hidden">
-              {/* Sliding Images */}
-              {heroImages.map((image, index) => (
+
+          <div className="md:w-1/2 relative">
+            <div className="relative w-full h-96 md:h-[500px] overflow-hidden rounded-2xl shadow-2xl border-4 border-white/50 backdrop-blur-sm">
+              {/* Creative Sliding Images */}
+              {galleryImages.map((image, index) => (
                 <div
-                  key={index}
-                  className={`absolute inset-0 transition-opacity duration-1000 ${
-                    index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-                  }`}
+                  key={image.id}
+                  className={getTransitionClasses(index)}
                 >
-                  <img
-                    src={image}
-                    alt={`Edau Farm - Image ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                  <div className={`w-full h-full ${getInactiveTransitionClasses(index)}`}>
+                    <img
+                      src={image.url}
+                      alt={image.original_name || `Edau Farm - Image ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Dynamic overlay based on transition */}
+                    <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent ${
+                      transitionType === 'zoom' ? 'animate-pulse' : ''
+                    }`}></div>
+                  </div>
                 </div>
               ))}
 
-              {/* Image Indicators */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                {heroImages.map((_, index) => (
+              {/* Transition indicator */}
+              <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm px-3 py-1 rounded-full">
+                <span className="text-white text-sm font-medium capitalize">{transitionType} Transition</span>
+              </div>
+
+              {/* Image indicators with thumbnails */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 bg-black/50 backdrop-blur-sm rounded-full px-3 py-2">
+                {galleryImages.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                    className={`relative w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75'
                     }`}
-                  />
+                  >
+                    {/* Mini thumbnail on hover */}
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                      <img
+                        src={image.url}
+                        alt="thumbnail"
+                        className="w-16 h-12 object-cover rounded border-2 border-white shadow-lg"
+                      />
+                    </div>
+                  </button>
                 ))}
               </div>
 
-              {/* Overlay Text */}
-              <div className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-sm px-4 py-2 rounded-lg">
-                <p className="text-sm font-medium text-white">Sustainable farming in West Pokot since 2015</p>
+              {/* Authentic farm overlay text */}
+              <div className="absolute bottom-4 left-4 bg-gradient-to-r from-amber-900/90 to-red-900/90 backdrop-blur-sm px-4 py-3 rounded-lg border border-amber-600/30">
+                <p className="text-white font-semibold text-sm">West Pokot's Finest</p>
+                <p className="text-amber-100 text-xs">Sustainable farming since 2015</p>
+              </div>
+
+              {/* Cultural pattern overlay */}
+              <div className="absolute top-4 right-4 w-16 h-16 opacity-20">
+                <svg viewBox="0 0 100 100" className="w-full h-full text-amber-600">
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <circle cx="50" cy="50" r="10" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M50 10 L50 90 M10 50 L90 50" stroke="currentColor" strokeWidth="1"/>
+                </svg>
               </div>
             </div>
           </div>

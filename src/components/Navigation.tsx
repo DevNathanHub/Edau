@@ -43,6 +43,7 @@ const Navigation = () => {
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-4">
           <Link to="/products" className="text-sm text-gray-600 hover:text-green-600 transition-colors">Products</Link>
+          <Link to="/gallery" className="text-sm text-gray-600 hover:text-green-600 transition-colors">Gallery</Link>
           <button onClick={() => handleNavigation("features")} className="text-sm text-gray-600 hover:text-green-600 transition-colors">Features</button>
           <Link to="/farm-visit" className="text-sm text-gray-600 hover:text-green-600 transition-colors">Farm Visit</Link>
           <button onClick={() => handleNavigation("contact")} className="text-sm text-gray-600 hover:text-green-600 transition-colors">Contact</button>
@@ -100,6 +101,13 @@ const Navigation = () => {
               onClick={() => setMobileMenuOpen(false)}
             >
               Products
+            </Link>
+            <Link 
+              to="/gallery" 
+              className="text-gray-600 hover:text-green-600 py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Gallery
             </Link>
             <button 
               onClick={() => handleNavigation("features")}

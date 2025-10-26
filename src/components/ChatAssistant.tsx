@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, Bot, ExternalLink, AlertTriangle, History, Plus, Trash2, ShoppingCart, Calendar, Phone, Star, Zap, Package, Users } from 'lucide-react';
+import { MessageCircle, Send, Bot, ExternalLink, AlertTriangle, History, Plus, Trash2, ShoppingCart, Calendar, Phone, Star, Zap, Package, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import { apiService, Message, Conversation } from '@/lib/api';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +33,8 @@ const ChatAssistant = () => {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [totalTokensUsed, setTotalTokensUsed] = useState(0);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
@@ -107,7 +109,26 @@ const ChatAssistant = () => {
     if (open && user) {
       loadConversations();
     }
+    // Load products when chat opens
+    if (open && products.length === 0) {
+      loadProducts();
+    }
   }, [open, user]);
+
+  const loadProducts = async () => {
+    try {
+      setLoadingProducts(true);
+      const result = await apiService.getProducts();
+      if (result.data && Array.isArray(result.data)) {
+        // Take first 8 products for the slider
+        setProducts(result.data.slice(0, 8));
+      }
+    } catch (error) {
+      console.error('Failed to load products:', error);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
 
   const loadConversations = async () => {
     try {
@@ -434,6 +455,87 @@ const ChatAssistant = () => {
     </div>
   );
 
+  const ProductSlider = () => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const itemsPerView = 2; // Show 2 products at a time on mobile
+
+    const nextSlide = () => {
+      setCurrentIndex((prev) => 
+        (prev + itemsPerView) >= products.length ? 0 : prev + itemsPerView
+      );
+    };
+
+    const prevSlide = () => {
+      setCurrentIndex((prev) => 
+        prev === 0 ? Math.max(0, products.length - itemsPerView) : prev - itemsPerView
+      );
+    };
+
+    if (loadingProducts || products.length === 0) return null;
+
+    const visibleProducts = products.slice(currentIndex, currentIndex + itemsPerView);
+
+    return (
+      <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-100">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+            <Package className="h-4 w-4 text-green-600" />
+            Featured Products
+          </h3>
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={prevSlide}
+              className="h-6 w-6 p-0 hover:bg-white"
+              disabled={currentIndex === 0 && products.length <= itemsPerView}
+            >
+              <ChevronLeft className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={nextSlide}
+              className="h-6 w-6 p-0 hover:bg-white"
+              disabled={currentIndex + itemsPerView >= products.length}
+            >
+              <ChevronRight className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {visibleProducts.map((product) => (
+            <Card key={product.id || product._id} className="cursor-pointer hover:shadow-md transition-shadow border-0 bg-white/80">
+              <CardContent className="p-3">
+                <div className="aspect-square mb-2 rounded-lg overflow-hidden bg-gray-100">
+                  <img
+                    src={product.imageURL?.[0] || product.image_url || '/placeholder-product.jpg'}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = '/placeholder-product.jpg';
+                    }}
+                  />
+                </div>
+                <h4 className="text-xs font-medium text-gray-900 truncate">{product.name}</h4>
+                <p className="text-xs text-green-600 font-semibold mt-1">
+                  KSh {product.price}/{product.unit || 'unit'}
+                </p>
+                <Button
+                  size="sm"
+                  className="w-full mt-2 h-6 text-xs bg-green-600 hover:bg-green-700"
+                  onClick={() => setInput(`Tell me about ${product.name}`)}
+                >
+                  Learn More
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const clearCurrentConversation = () => {
     if (currentConversation && (currentConversation.messages || []).length > 0) {
       if (confirm('Are you sure you want to clear this conversation? This action cannot be undone.')) {
@@ -536,8 +638,14 @@ const ChatAssistant = () => {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <div className="fixed bottom-20 right-4 z-50">
-          <Button className="h-12 w-12 rounded-full shadow-lg bg-[#4CAF50] hover:bg-[#388E3C] relative" size="icon">
-            <MessageCircle className="h-6 w-6" />
+          <div className="relative">
+            <Button className="h-12 w-12 rounded-full shadow-lg bg-[#4CAF50] hover:bg-[#388E3C] relative" size="icon">
+              <Bot className="h-6 w-6" />
+            </Button>
+            {/* Ask AI? tag */}
+            <div className="absolute -top-2 -left-2 bg-[#FFC107] text-black text-xs font-bold px-2 py-1 rounded-full shadow-md">
+              Ask AI?
+            </div>
             {/* Active badge indicator */}
             {currentConversation && (currentConversation.messages || []).length > 0 && (
               <div className="absolute -top-1 -right-1 h-4 w-4 bg-[#FFC107] rounded-full flex items-center justify-center">
@@ -550,21 +658,26 @@ const ChatAssistant = () => {
                 !
               </div>
             )}
-          </Button>
+          </div>
         </div>
       </SheetTrigger>
 
-      <SheetContent className="w-[95vw] sm:w-[500px] flex flex-col p-0">
-        <SheetHeader className="p-4 border-b">
+      <SheetContent className="w-[95vw] sm:w-[500px] flex flex-col p-0 bg-gradient-to-b from-green-50 to-white">
+        <SheetHeader className="p-4 border-b bg-white/80 backdrop-blur-sm">
           <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <Bot className="h-6 w-6 mr-2 text-green-600" />
-              <SheetTitle>Edau Farm Assistant</SheetTitle>
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                <Bot className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <SheetTitle className="text-lg font-semibold text-gray-900">Edau Farm Assistant</SheetTitle>
+                <p className="text-xs text-gray-500">Fresh products & farm experiences</p>
+              </div>
             </div>
             <div className="flex items-center space-x-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100">
                     <History className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -613,7 +726,7 @@ const ChatAssistant = () => {
             </div>
           </div>
           {currentConversation && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+            <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
               <span>{currentConversation.messages.length} messages</span>
               <span>•</span>
               <span>{currentConversation.token_count || 0} tokens</span>
@@ -628,7 +741,7 @@ const ChatAssistant = () => {
               {currentConversation.lastAgent && (
                 <>
                   <span>•</span>
-                  <Badge variant="outline" className="text-xs h-5">
+                  <Badge variant="outline" className="text-xs h-5 bg-green-50 text-green-700 border-green-200">
                     {currentConversation.lastAgent}
                   </Badge>
                 </>
@@ -636,12 +749,12 @@ const ChatAssistant = () => {
             </div>
           )}
           {currentConversation && (currentConversation.token_count || 0) >= MAX_TOKENS_PER_CONVERSATION * 0.8 && (
-            <div className="text-xs text-yellow-600 bg-yellow-50 p-2 rounded mt-1">
+            <div className="text-xs text-yellow-600 bg-yellow-50 p-2 rounded mt-2 border border-yellow-200">
               ⚠️ Conversation is approaching token limit. Consider starting a new conversation.
             </div>
           )}
           {totalTokensUsed >= MAX_TOTAL_TOKENS * 0.9 && totalTokensUsed < MAX_TOTAL_TOKENS && (
-            <div className="text-xs text-red-600 bg-red-50 p-2 rounded mt-1">
+            <div className="text-xs text-red-600 bg-red-50 p-2 rounded mt-2 border border-red-200">
               ⚠️ Daily token limit almost reached. Chat functionality may be limited soon.
             </div>
           )}
@@ -650,12 +763,15 @@ const ChatAssistant = () => {
         <div className="flex-1 overflow-auto p-4 space-y-4">
           {!currentConversation || currentConversation.messages.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
-              <Bot className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p className="text-lg font-medium mb-2">Welcome to Edau Farm Assistant!</p>
-              <p className="text-sm mb-4">I'm here to help you discover our fresh, sustainable products and experiences.</p>
+              <div className="h-16 w-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                <Bot className="h-8 w-8 text-green-600" />
+              </div>
+              <p className="text-lg font-medium mb-2 text-gray-900">Welcome to Edau Farm Assistant!</p>
+              <p className="text-sm mb-4 text-gray-600">I'm here to help you discover our fresh, sustainable products and experiences.</p>
+              <ProductSlider />
               <QuickActions />
               {!user && (
-                <p className="text-xs mt-4 text-amber-600 bg-amber-50 p-2 rounded">
+                <p className="text-xs mt-4 text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
                   💡 Sign in to save your conversation history and get personalized recommendations
                 </p>
               )}
@@ -664,9 +780,15 @@ const ChatAssistant = () => {
             <>
               {currentConversation.messages.map((message) => (
                 <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] rounded-lg px-4 py-3 ${messageClassNames(message)}`}>
+                  <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
+                    message.role === 'user' 
+                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white rounded-br-md' 
+                      : message.role === 'system'
+                        ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 text-gray-800 rounded-bl-md'
+                        : 'bg-white border border-gray-200 text-gray-800 rounded-bl-md'
+                  }`}>
                     {message.role === 'system' && (
-                      <div className="flex items-center mb-2 text-amber-600">
+                      <div className="flex items-center mb-2 text-amber-700">
                         <AlertTriangle className="h-4 w-4 mr-1" />
                         <span className="text-xs font-medium">System Message</span>
                       </div>
@@ -678,7 +800,9 @@ const ChatAssistant = () => {
                     {renderMessageActions(message.actions)}
                     {renderSuggestions(message.suggestions)}
                     {message.timestamp && (
-                      <div className={`text-xs mt-2 ${message.role === 'user' ? 'text-green-100' : 'text-gray-500'}`}>
+                      <div className={`text-xs mt-2 ${
+                        message.role === 'user' ? 'text-green-100' : 'text-gray-500'
+                      }`}>
                         {formatTimestamp(message.timestamp)}
                       </div>
                     )}
@@ -687,21 +811,23 @@ const ChatAssistant = () => {
               ))}
               {isTyping && (
                 <div className="flex justify-start">
-                  <div className="max-w-[85%] rounded-lg px-4 py-3 bg-gray-100 flex items-center space-x-2">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"></div>
-                      <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce delay-75"></div>
-                      <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce delay-150"></div>
+                  <div className="max-w-[85%] rounded-2xl px-4 py-3 bg-white border border-gray-200 shadow-sm rounded-bl-md">
+                    <div className="flex items-center space-x-2">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 rounded-full bg-green-400 animate-bounce"></div>
+                        <div className="w-2 h-2 rounded-full bg-green-400 animate-bounce delay-75"></div>
+                        <div className="w-2 h-2 rounded-full bg-green-400 animate-bounce delay-150"></div>
+                      </div>
+                      <span className="text-xs text-gray-500">Edau Assistant is typing...</span>
                     </div>
-                    <span className="text-xs text-gray-500">Edau Assistant is typing...</span>
                   </div>
                 </div>
               )}
             </>
           )}
           <div ref={messagesEndRef} />
-        </div>        <div className="p-4 border-t">
-          <div className="flex items-end space-x-2">
+        </div>        <div className="p-4 border-t bg-white/80 backdrop-blur-sm">
+          <div className="flex items-end space-x-3">
             <div className="flex-1 relative">
               <Textarea
                 value={input}
@@ -712,7 +838,7 @@ const ChatAssistant = () => {
                   !canSendMessage() && input.trim() ? getSendButtonState().tooltip :
                   "Ask about products, orders, visits, or anything farm-related..."
                 }
-                className="min-h-[60px] max-h-[120px] resize-none pr-12"
+                className="min-h-[50px] max-h-[120px] resize-none pr-12 border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-xl shadow-sm"
                 rows={2}
                 disabled={loading}
               />
@@ -726,21 +852,21 @@ const ChatAssistant = () => {
               onClick={handleSend}
               disabled={!canSendMessage()}
               size="icon"
-              className="h-10 w-10 flex-shrink-0"
+              className="h-11 w-11 flex-shrink-0 rounded-xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               title={getSendButtonState().tooltip}
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-5 h-5" />
             </Button>
           </div>
-          <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
+          <div className="flex justify-between items-center mt-3 text-xs text-gray-500">
             <span>Press Enter to send, Shift+Enter for new line</span>
             <div className="flex items-center gap-2">
-              {loading && <span className="text-green-600">Processing your message...</span>}
+              {loading && <span className="text-green-600 font-medium">Processing your message...</span>}
               {!loading && input.trim() && !canSendMessage() && (
                 <span className="text-red-500">{getSendButtonState().tooltip}</span>
               )}
               {input.length > 0 && (
-                <span className={input.length > 450 ? 'text-yellow-500' : 'text-gray-400'}>
+                <span className={input.length > 450 ? 'text-yellow-500 font-medium' : 'text-gray-400'}>
                   {input.length}/500
                 </span>
               )}

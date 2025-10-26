@@ -29,6 +29,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const FarmVisit = lazy(() => import("./pages/FarmVisit"));
+const AI = lazy(() => import("./pages/AI"));
 
 const App = () => {
   // Create a client inside the component to avoid issues with hot module reloading
@@ -58,6 +59,7 @@ const App = () => {
                   <Route path="/admin/*" element={<AdminRoute><Admin /></AdminRoute>} />
                   <Route path="/gallery" element={<GalleryPage />} />
                   <Route path="/farm-visit" element={<FarmVisit />} />
+                  <Route path="/ai" element={<AI />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Search, Bell, User, Settings, LogOut, ChevronDown } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, User, Settings, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Badge } from "./ui/badge";
+import NotificationCenter, { NotificationItem } from "./admin/NotificationCenter";
 
 interface AdminNavbarProps {
   onSearch?: (query: string) => void;
@@ -20,7 +20,36 @@ interface AdminNavbarProps {
 const AdminNavbar: React.FC<AdminNavbarProps> = ({ onSearch }) => {
   const { user, signOut } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [notifications] = useState(3); // Mock notification count
+  const [notifications, setNotifications] = useState<NotificationItem[]>([
+    {
+      id: '1',
+      type: 'info',
+      title: 'Welcome to Admin Panel',
+      message: 'You have successfully logged into the admin dashboard.',
+      timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+      read: false,
+    },
+    {
+      id: '2',
+      type: 'warning',
+      title: 'Low Stock Alert',
+      message: 'Dorper Sheep inventory is running low (8 remaining).',
+      timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+      read: false,
+      actionUrl: '/admin/products',
+      actionLabel: 'View Products',
+    },
+    {
+      id: '3',
+      type: 'success',
+      title: 'New Order Received',
+      message: 'Order #1234 has been placed for honey products.',
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+      read: true,
+      actionUrl: '/admin/orders',
+      actionLabel: 'View Order',
+    },
+  ]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +60,42 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onSearch }) => {
     await signOut();
     window.location.href = '/';
   };
+
+  const handleMarkAsRead = (id: string) => {
+    setNotifications(prev =>
+      prev.map(notification =>
+        notification.id === id ? { ...notification, read: true } : notification
+      )
+    );
+  };
+
+  const handleMarkAllAsRead = () => {
+    setNotifications(prev =>
+      prev.map(notification => ({ ...notification, read: true }))
+    );
+  };
+
+  const handleClearAll = () => {
+    setNotifications([]);
+  };
+
+  const addNotification = (notification: Omit<NotificationItem, 'id' | 'timestamp'>) => {
+    const newNotification: NotificationItem = {
+      ...notification,
+      id: Date.now().toString(),
+      timestamp: new Date(),
+      read: false,
+    };
+    setNotifications(prev => [newNotification, ...prev]);
+  };
+
+  // Expose addNotification to window for global access (can be improved with context)
+  useEffect(() => {
+    (window as any).addAdminNotification = addNotification;
+    return () => {
+      delete (window as any).addAdminNotification;
+    };
+  }, []);
 
   return (
     <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
@@ -55,17 +120,12 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onSearch }) => {
           {/* Right side - Actions */}
           <div className="flex items-center space-x-4">
             {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative p-2 hover:bg-gray-100 rounded-lg">
-              <Bell className="h-5 w-5 text-gray-600" />
-              {notifications > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500"
-                >
-                  {notifications}
-                </Badge>
-              )}
-            </Button>
+            <NotificationCenter
+              notifications={notifications}
+              onMarkAsRead={handleMarkAsRead}
+              onMarkAllAsRead={handleMarkAllAsRead}
+              onClearAll={handleClearAll}
+            />
 
             {/* Profile Dropdown */}
             <DropdownMenu>

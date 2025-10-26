@@ -696,9 +696,10 @@ app.put('/api/users/:id', async (req: Request, res: Response) => {
   try {
     if (!db) throw new Error('Database not connected');
     const { id } = req.params;
-    const { first_name, last_name, phone, address, role } = req.body;
+    const { first_name, last_name, phone, address, role, status } = req.body;
     const updates: any = { first_name, last_name, phone, address, updated_at: new Date() };
     if (role) updates.role = role;
+    if (status) updates.status = status;
     let query: any;
     try {
       query = { _id: new ObjectId(id) };

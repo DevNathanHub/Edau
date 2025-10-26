@@ -10,6 +10,11 @@ export interface User {
   phone?: string;
   address?: string;
   avatar?: string;
+  role?: 'admin' | 'moderator' | 'user';
+  status?: 'active' | 'inactive';
+  last_login?: Date;
+  total_orders?: number;
+  total_spent?: number;
   created_at?: Date;
   updated_at?: Date;
 }

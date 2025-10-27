@@ -229,12 +229,12 @@ const Gallery = () => {
   }
   
   return (
-    <div className="py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Farm Gallery</h2>
+    <div className="py-6 md:py-8 px-4 md:px-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <h2 className="text-xl md:text-2xl font-bold">Farm Gallery</h2>
         
         {isAdmin && (
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <input
               type="file"
               id="image-upload"
@@ -244,7 +244,7 @@ const Gallery = () => {
               disabled={isUploading}
             />
             <Button 
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
               disabled={isUploading}
             >
               <Upload className="mr-2 h-4 w-4" />
@@ -262,7 +262,7 @@ const Gallery = () => {
           )}
         </div>
       ) : (
-        <MasonryLayout columnCount={columnCount} gap={20}>
+        <MasonryLayout columnCount={columnCount} gap={16}>
           {galleryImages.map((image) => (
             <Card key={image.id || image._id} className="overflow-hidden group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-0 shadow-md">
               <Dialog>
@@ -323,39 +323,41 @@ const Gallery = () => {
                     </div>
                   </div>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-auto">
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center justify-between">
-                      <span>{image.original_name || 'Gallery Image'}</span>
-                      <div className="flex space-x-2">
+                <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-auto p-4 md:p-6">
+                  <DialogHeader className="space-y-2 md:space-y-3">
+                    <DialogTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-lg md:text-xl">
+                      <span className="truncate">{image.original_name || 'Gallery Image'}</span>
+                      <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleShareImage(image.url)}
+                          className="flex-1 sm:flex-none"
                         >
-                          <Share2 className="mr-2 h-4 w-4" />
+                          <Share2 className="mr-2 h-3 w-3 md:h-4 md:w-4" />
                           Share
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => window.open(image.url, '_blank')}
+                          className="flex-1 sm:flex-none"
                         >
-                          <ExternalLink className="mr-2 h-4 w-4" />
+                          <ExternalLink className="mr-2 h-3 w-3 md:h-4 md:w-4" />
                           View Full Size
                         </Button>
                       </div>
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription className="text-sm md:text-base">
                       Uploaded on {new Date(image.created_at).toLocaleDateString()}
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="flex flex-col space-y-4">
+                  <div className="flex flex-col space-y-4 mt-4">
                     <div className="overflow-hidden rounded-md">
                       <img
                         src={image.url}
                         alt={image.original_name || 'Gallery image'}
-                        className="object-contain max-h-[70vh] w-full"
+                        className="object-contain max-h-[60vh] md:max-h-[70vh] w-full"
                       />
                     </div>
                   </div>

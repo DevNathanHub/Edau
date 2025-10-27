@@ -129,7 +129,7 @@ const Hero = () => {
   }
 
   return (
-    <section className="h-screen-mobile md:h-screen flex items-center bg-gradient-to-b from-[#8B4513] via-[#A0522D] to-[#FFF8E1] relative overflow-hidden">
+    <section className="min-h-screen-mobile md:h-screen flex items-center bg-gradient-to-b from-[#8B4513] via-[#A0522D] to-[#FFF8E1] relative overflow-hidden">
       {/* Authentic Farm Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Acacia tree silhouettes */}
@@ -160,7 +160,7 @@ const Hero = () => {
         <div className="absolute top-1/2 left-1/2 w-4 h-1 bg-green-600/30 transform -rotate-12 animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-4 relative z-10 py-8 md:py-0">
         <div className="flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 md:pr-8 mb-8 md:mb-0">
             <div className="flex items-center mb-4">
@@ -169,45 +169,45 @@ const Hero = () => {
               </div>
               <span className="text-amber-800 font-semibold text-lg">Edau Farm - West Pokot</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4 text-white">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 text-white">
               From West Pokot Soil <br />
               <span className="text-amber-300">to Your Table</span>
             </h1>
-            <p className="text-lg text-white mb-6 leading-relaxed">
+            <p className="text-base md:text-lg text-white mb-6 leading-relaxed">
               Experience the authentic flavors of West Pokot through our Acacia honey, heritage-bred livestock,
               seasonal fruits, and free-range poultry — raised with traditional wisdom and modern care.
             </p>
             
             {/* Authentic Farm Story Highlight */}
-            <div className="bg-gradient-to-r from-amber-50 to-green-50 border border-amber-200 rounded-xl p-6 mb-6 shadow-lg">
+            <div className="bg-gradient-to-r from-amber-50 to-green-50 border border-amber-200 rounded-xl p-4 md:p-6 mb-6 shadow-lg">
               <div className="flex items-center mb-3">
                 <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center mr-3">
                   <User className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-amber-900 font-bold">Our AI Farm Assistant</span>
               </div>
-              <p className="text-amber-800 mb-4 leading-relaxed">
+              <p className="text-amber-800 mb-4 leading-relaxed text-sm md:text-base">
                 Meet your digital guide to Edau Farm! Get instant answers about our products, place custom orders,
                 book farm visits, and discover the stories behind our sustainable farming practices.
               </p>
-              <div className="flex flex-wrap gap-2 text-sm">
-                <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full border border-amber-200">24/7 Support</span>
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full border border-green-200">Local Knowledge</span>
-                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full border border-blue-200">Expert Advice</span>
+              <div className="flex flex-wrap gap-2 text-xs md:text-sm">
+                <span className="bg-amber-100 text-amber-800 px-2 md:px-3 py-1 rounded-full border border-amber-200">24/7 Support</span>
+                <span className="bg-green-100 text-green-800 px-2 md:px-3 py-1 rounded-full border border-green-200">Local Knowledge</span>
+                <span className="bg-blue-100 text-blue-800 px-2 md:px-3 py-1 rounded-full border border-blue-200">Expert Advice</span>
               </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
               <Link to="/products">
-                <Button size="lg" className="bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200">
-                  <ShoppingCart className="mr-2 h-5 w-5" />
-                  Explore Our Products <ArrowRight className="ml-2 h-5 w-5" />
+                <Button size="lg" className="bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 w-full sm:w-auto">
+                  <ShoppingCart className="mr-2 h-4 md:h-5 w-4 md:w-5" />
+                  Explore Our Products <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
                 </Button>
               </Link>
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="border-2 border-amber-600 text-amber-700 hover:bg-amber-50 shadow-md transform hover:scale-105 transition-all duration-200"
+                className="border-2 border-amber-600 text-amber-700 hover:bg-amber-50 shadow-md transform hover:scale-105 transition-all duration-200 w-full sm:w-auto"
                 onClick={() => {
                   const chatButton = document.querySelector('[data-chat-trigger]');
                   if (chatButton) {
@@ -215,14 +215,14 @@ const Hero = () => {
                   }
                 }}
               >
-                <MessageCircle className="mr-2 h-5 w-5" />
+                <MessageCircle className="mr-2 h-4 md:h-5 w-4 md:w-5" />
                 Ask Our AI Assistant
               </Button>
               <Link to="/farm-visit">
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="border-2 border-green-600 text-green-700 hover:bg-green-50 shadow-md transform hover:scale-105 transition-all duration-200"
+                  className="border-2 border-green-600 text-green-700 hover:bg-green-50 shadow-md transform hover:scale-105 transition-all duration-200 w-full sm:w-auto"
                 >
                   Book Farm Visit
                 </Button>
@@ -230,8 +230,8 @@ const Hero = () => {
             </div>
           </div>
 
-          <div className="md:w-1/2 relative">
-            <div className="relative w-full h-96 md:h-[500px] overflow-hidden rounded-2xl shadow-2xl border-4 border-white/50 backdrop-blur-sm">
+          <div className="md:w-1/2 relative w-full">
+            <div className="relative w-full h-64 md:h-80 lg:h-[500px] overflow-hidden rounded-2xl shadow-2xl border-4 border-white/50 backdrop-blur-sm">
               {/* Creative Sliding Images */}
               {galleryImages.map((image, index) => (
                 <div
@@ -253,26 +253,26 @@ const Hero = () => {
               ))}
 
               {/* Transition indicator */}
-              <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm px-3 py-1 rounded-full">
-                <span className="text-white text-sm font-medium capitalize">{transitionType} Transition</span>
+              <div className="absolute top-2 md:top-4 left-2 md:left-4 bg-black/70 backdrop-blur-sm px-2 md:px-3 py-1 rounded-full">
+                <span className="text-white text-xs md:text-sm font-medium capitalize">{transitionType} Transition</span>
               </div>
 
               {/* Image indicators with thumbnails */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 bg-black/50 backdrop-blur-sm rounded-full px-3 py-2">
+              <div className="absolute bottom-2 md:bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1 md:space-x-2 bg-black/50 backdrop-blur-sm rounded-full px-2 md:px-3 py-1 md:py-2">
                 {galleryImages.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`relative w-3 h-3 rounded-full transition-all duration-300 ${
+                    className={`relative w-2 h-2 md:w-3 md:h-3 rounded-full transition-all duration-300 ${
                       index === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75'
                     }`}
                   >
                     {/* Mini thumbnail on hover */}
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 md:mb-2 opacity-0 hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                       <img
                         src={image.url}
                         alt="thumbnail"
-                        className="w-16 h-12 object-cover rounded border-2 border-white shadow-lg"
+                        className="w-12 md:w-16 h-8 md:h-12 object-cover rounded border-2 border-white shadow-lg"
                       />
                     </div>
                   </button>
@@ -280,13 +280,13 @@ const Hero = () => {
               </div>
 
               {/* Authentic farm overlay text */}
-              <div className="absolute bottom-4 left-4 bg-gradient-to-r from-amber-900/90 to-red-900/90 backdrop-blur-sm px-4 py-3 rounded-lg border border-amber-600/30">
-                <p className="text-white font-semibold text-sm">West Pokot's Finest</p>
+              <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 bg-gradient-to-r from-amber-900/90 to-red-900/90 backdrop-blur-sm px-2 md:px-4 py-1 md:py-3 rounded-lg border border-amber-600/30">
+                <p className="text-white font-semibold text-xs md:text-sm">West Pokot's Finest</p>
                 <p className="text-amber-100 text-xs">Sustainable farming since 2015</p>
               </div>
 
               {/* Cultural pattern overlay */}
-              <div className="absolute top-4 right-4 w-16 h-16 opacity-20">
+              <div className="absolute top-2 md:top-4 right-2 md:right-4 w-12 md:w-16 h-12 md:h-16 opacity-20">
                 <svg viewBox="0 0 100 100" className="w-full h-full text-amber-600">
                   <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="2"/>
                   <circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" strokeWidth="2"/>

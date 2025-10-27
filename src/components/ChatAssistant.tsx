@@ -108,17 +108,22 @@ const ChatAssistant = () => {
 
   // Handle external trigger for chat opening with bounce animation
   useEffect(() => {
-    const handleChatTrigger = () => {
-      setIsBouncing(true);
-      setOpen(true);
-      // Reset bounce after animation
-      setTimeout(() => setIsBouncing(false), 1000);
+    const handleChatTrigger = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // Small delay to ensure proper state management
+      setTimeout(() => {
+        setIsBouncing(true);
+        setOpen(true);
+        // Reset bounce after animation
+        setTimeout(() => setIsBouncing(false), 1000);
+      }, 10);
     };
 
     const chatTrigger = document.querySelector('[data-chat-trigger]');
     if (chatTrigger) {
-      chatTrigger.addEventListener('click', handleChatTrigger);
-      return () => chatTrigger.removeEventListener('click', handleChatTrigger);
+      chatTrigger.addEventListener('click', handleChatTrigger, { capture: true, passive: false });
+      return () => chatTrigger.removeEventListener('click', handleChatTrigger, { capture: true });
     }
   }, []);
 
@@ -474,7 +479,7 @@ const ChatAssistant = () => {
 
   const ProductSlider = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const itemsPerView = 2; // Show 2 products at a time on mobile
+    const itemsPerView = window.innerWidth < 640 ? 2 : 3; // Show 2 on mobile, 3 on larger screens
 
     const nextSlide = () => {
       setCurrentIndex((prev) => 
@@ -497,7 +502,7 @@ const ChatAssistant = () => {
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
             <Package className="h-4 w-4 text-green-600" />
-            Featured Products
+            Recommended for You
           </h3>
           <div className="flex gap-1">
             <Button
@@ -520,9 +525,84 @@ const ChatAssistant = () => {
             </Button>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className={`grid gap-2 ${itemsPerView === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
           {visibleProducts.map((product) => (
-            <Card key={product.id || product._id} className="cursor-pointer hover:shadow-md transition-shadow border-0 bg-white/80">
+            <Card key={product.id || product._id} className="cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105 border-0 bg-white/80">
+              <CardContent className="p-2">
+                <div className="aspect-square mb-2 rounded-lg overflow-hidden bg-gray-100">
+                  <img
+                    src={product.imageURL?.[0] || product.image_url || '/placeholder-product.jpg'}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = '/placeholder-product.jpg';
+                    }}
+                  />
+                </div>
+                <h4 className="text-xs font-medium text-gray-900 truncate mb-1">{product.name}</h4>
+                <p className="text-xs text-green-600 font-semibold">
+                  KSh {product.price}/{product.unit || 'unit'}
+                </p>
+                <Button
+                  size="sm"
+                  className="w-full mt-2 h-6 text-xs bg-green-600 hover:bg-green-700"
+                  onClick={() => setInput(`Tell me about ${product.name}`)}
+                >
+                  Learn More
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const PersonalizedRecommendations = () => {
+    // Show recommendations based on conversation context
+    const shouldShowRecommendations = currentConversation && currentConversation.messages.length > 0;
+    
+    if (!shouldShowRecommendations || loadingProducts || products.length === 0) return null;
+
+    // Get recommendations based on recent messages
+    const recentMessages = currentConversation.messages.slice(-3);
+    const messageText = recentMessages.map(m => m.content).join(' ').toLowerCase();
+    
+    let recommendedProducts = products;
+    
+    // Filter products based on conversation context
+    if (messageText.includes('honey')) {
+      recommendedProducts = products.filter(p => 
+        p.name.toLowerCase().includes('honey') || 
+        p.description?.toLowerCase().includes('honey')
+      );
+    } else if (messageText.includes('fruit')) {
+      recommendedProducts = products.filter(p => 
+        p.category?.toLowerCase().includes('fruit') ||
+        p.name.toLowerCase().includes('fruit')
+      );
+    } else if (messageText.includes('sheep') || messageText.includes('meat')) {
+      recommendedProducts = products.filter(p => 
+        p.category?.toLowerCase().includes('sheep') ||
+        p.name.toLowerCase().includes('sheep') ||
+        p.name.toLowerCase().includes('meat')
+      );
+    }
+
+    // If no specific matches, show first 6 products
+    if (recommendedProducts.length === 0) {
+      recommendedProducts = products.slice(0, 6);
+    }
+
+    return (
+      <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100">
+        <div className="flex items-center gap-2 mb-3">
+          <Star className="h-4 w-4 text-purple-600" />
+          <h3 className="text-sm font-semibold text-gray-800">Personalized Recommendations</h3>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {recommendedProducts.slice(0, 6).map((product) => (
+            <Card key={product.id || product._id} className="cursor-pointer hover:shadow-lg transition-all duration-200 transform hover:scale-105 border-0 bg-white/90">
               <CardContent className="p-3">
                 <div className="aspect-square mb-2 rounded-lg overflow-hidden bg-gray-100">
                   <img
@@ -534,16 +614,17 @@ const ChatAssistant = () => {
                     }}
                   />
                 </div>
-                <h4 className="text-xs font-medium text-gray-900 truncate">{product.name}</h4>
-                <p className="text-xs text-green-600 font-semibold mt-1">
-                  KSh {product.price}/{product.unit || 'unit'}
+                <h4 className="text-xs font-medium text-gray-900 truncate mb-1">{product.name}</h4>
+                <p className="text-xs text-purple-600 font-semibold mb-2">
+                  KSh {product.price}
                 </p>
                 <Button
                   size="sm"
-                  className="w-full mt-2 h-6 text-xs bg-green-600 hover:bg-green-700"
+                  variant="outline"
+                  className="w-full h-7 text-xs border-purple-200 text-purple-700 hover:bg-purple-50"
                   onClick={() => setInput(`Tell me about ${product.name}`)}
                 >
-                  Learn More
+                  Ask AI
                 </Button>
               </CardContent>
             </Card>
@@ -661,6 +742,14 @@ const ChatAssistant = () => {
                 isBouncing ? 'animate-bounce scale-110' : ''
               }`} 
               size="icon"
+              onClick={(e) => {
+                // Only handle real user clicks, not programmatic ones
+                if (e.isTrusted) {
+                  setIsBouncing(true);
+                  setOpen(true);
+                  setTimeout(() => setIsBouncing(false), 1000);
+                }
+              }}
             >
               <Bot className="h-6 w-6" />
             </Button>
@@ -684,7 +773,7 @@ const ChatAssistant = () => {
         </div>
       </SheetTrigger>
 
-      <SheetContent className="w-[95vw] sm:w-[500px] flex flex-col p-0 bg-gradient-to-b from-green-50 to-white">
+      <SheetContent className="w-full h-full sm:w-[500px] sm:h-auto flex flex-col p-0 bg-gradient-to-b from-green-50 to-white">
         <SheetHeader className="p-4 border-b bg-white/80 backdrop-blur-sm">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
@@ -747,39 +836,6 @@ const ChatAssistant = () => {
               <SheetClose className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-gray-100" />
             </div>
           </div>
-          {currentConversation && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
-              <span>{currentConversation.messages.length} messages</span>
-              <span>•</span>
-              <span>{currentConversation.token_count || 0} tokens</span>
-              {totalTokensUsed > 0 && (
-                <>
-                  <span>•</span>
-                  <span className={totalTokensUsed >= MAX_TOTAL_TOKENS ? 'text-red-500' : totalTokensUsed >= MAX_TOTAL_TOKENS * 0.8 ? 'text-yellow-500' : 'text-blue-500'}>
-                    {totalTokensUsed}/{MAX_TOTAL_TOKENS} total
-                  </span>
-                </>
-              )}
-              {currentConversation.lastAgent && (
-                <>
-                  <span>•</span>
-                  <Badge variant="outline" className="text-xs h-5 bg-green-50 text-green-700 border-green-200">
-                    {currentConversation.lastAgent}
-                  </Badge>
-                </>
-              )}
-            </div>
-          )}
-          {currentConversation && (currentConversation.token_count || 0) >= MAX_TOKENS_PER_CONVERSATION * 0.8 && (
-            <div className="text-xs text-yellow-600 bg-yellow-50 p-2 rounded mt-2 border border-yellow-200">
-              ⚠️ Conversation is approaching token limit. Consider starting a new conversation.
-            </div>
-          )}
-          {totalTokensUsed >= MAX_TOTAL_TOKENS * 0.9 && totalTokensUsed < MAX_TOTAL_TOKENS && (
-            <div className="text-xs text-red-600 bg-red-50 p-2 rounded mt-2 border border-red-200">
-              ⚠️ Daily token limit almost reached. Chat functionality may be limited soon.
-            </div>
-          )}
         </SheetHeader>
 
         <div className="flex-1 overflow-auto p-4 space-y-4">
@@ -791,6 +847,7 @@ const ChatAssistant = () => {
               <p className="text-lg font-medium mb-2 text-gray-900">Welcome to Edau Farm Assistant!</p>
               <p className="text-sm mb-4 text-gray-600">I'm here to help you discover our fresh, sustainable products and experiences.</p>
               <ProductSlider />
+              <PersonalizedRecommendations />
               <QuickActions />
               {!user && (
                 <p className="text-xs mt-4 text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
@@ -800,6 +857,7 @@ const ChatAssistant = () => {
             </div>
           ) : (
             <>
+              <PersonalizedRecommendations />
               {currentConversation.messages.map((message) => (
                 <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${

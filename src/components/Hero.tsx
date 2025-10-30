@@ -23,7 +23,7 @@ const Hero = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Fetch gallery images for hero carousel
-  const { data: galleryImages = [] } = useQuery<GalleryImage[]>({
+  const { data: galleryImages = [], isLoading } = useQuery<GalleryImage[]>({
     queryKey: ['heroGalleryImages'],
     queryFn: async (): Promise<GalleryImage[]> => {
       try {
@@ -57,6 +57,14 @@ const Hero = () => {
   });
 
   const transitionTypes: ('fade' | 'slide' | 'zoom' | 'rotate')[] = ['fade', 'slide', 'zoom', 'rotate'];
+
+  // Track per-image load state so we can show skeletons until each image loads
+  const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
+
+  useEffect(() => {
+    // initialize loaded flags when images change
+    setImageLoaded(new Array(galleryImages.length).fill(false));
+  }, [galleryImages.length]);
 
   useEffect(() => {
     if (galleryImages.length === 0) return;
@@ -117,16 +125,8 @@ const Hero = () => {
     }
   };
 
-  if (galleryImages.length === 0) {
-    return (
-      <section className="h-full flex items-center bg-gradient-to-b from-[#FFF8E1] to-white relative overflow-hidden">
-        <div className="container mx-auto px-4 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading farm gallery...</p>
-        </div>
-      </section>
-    );
-  }
+  // Note: we intentionally render the full hero layout even while gallery images are loading.
+  // Per-image skeletons are shown in the image area instead of a global loader.
 
   return (
     <section className="min-h-screen-mobile md:h-screen flex items-center bg-gradient-to-b from-[#8B4513] via-[#A0522D] to-[#FFF8E1] relative overflow-hidden">
@@ -233,24 +233,49 @@ const Hero = () => {
           <div className="md:w-1/2 relative w-full">
             <div className="relative w-full h-64 md:h-80 lg:h-[500px] overflow-hidden rounded-2xl shadow-2xl border-4 border-white/50 backdrop-blur-sm">
               {/* Creative Sliding Images */}
-              {galleryImages.map((image, index) => (
-                <div
-                  key={image.id}
-                  className={getTransitionClasses(index)}
-                >
-                  <div className={`w-full h-full ${getInactiveTransitionClasses(index)}`}>
-                    <img
-                      src={image.url}
-                      alt={image.original_name || `Edau Farm - Image ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    {/* Dynamic overlay based on transition */}
-                    <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent ${
-                      transitionType === 'zoom' ? 'animate-pulse' : ''
-                    }`}></div>
+              {(isLoading || galleryImages.length === 0) ? (
+                // Show 3 skeleton slides while loading
+                [0,1,2].map((i) => (
+                  <div key={`skeleton-${i}`} className={`absolute inset-0 transition-all duration-1000 ease-in-out opacity-100`}>
+                    <div className={`w-full h-full`}>
+                      <div className="w-full h-full bg-gray-200 animate-pulse"></div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                galleryImages.map((image, index) => (
+                  <div
+                    key={image.id}
+                    className={getTransitionClasses(index)}
+                  >
+                    <div className={`w-full h-full ${getInactiveTransitionClasses(index)}`}>
+                      {/* Image element with per-image skeleton */}
+                      <img
+                        src={image.url}
+                        alt={image.original_name || `Edau Farm - Image ${index + 1}`}
+                        className={`w-full h-full object-cover ${imageLoaded[index] ? '' : 'hidden'}`}
+                        onLoad={() => {
+                          setImageLoaded(prev => {
+                            const copy = [...prev];
+                            copy[index] = true;
+                            return copy;
+                          });
+                        }}
+                      />
+
+                      {/* Skeleton placeholder shown until image loads */}
+                      {!imageLoaded[index] && (
+                        <div className="w-full h-full bg-gray-200 animate-pulse" aria-hidden="true"></div>
+                      )}
+
+                      {/* Dynamic overlay based on transition */}
+                      <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent ${
+                        transitionType === 'zoom' ? 'animate-pulse' : ''
+                      } ${!imageLoaded[index] ? 'pointer-events-none' : ''}`}></div>
+                    </div>
+                  </div>
+                ))
+              )}
 
               {/* Transition indicator */}
               <div className="absolute top-2 md:top-4 left-2 md:left-4 bg-black/70 backdrop-blur-sm px-2 md:px-3 py-1 rounded-full">

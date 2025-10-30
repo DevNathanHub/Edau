@@ -160,7 +160,7 @@ const Hero = () => {
         <div className="absolute top-1/2 left-1/2 w-4 h-1 bg-green-600/30 transform -rotate-12 animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10 py-8 md:py-0">
+  <div className="container mx-auto px-4 relative z-10 py-0">
         <div className="flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 md:pr-8 mb-8 md:mb-0">
             <div className="flex items-center mb-4">

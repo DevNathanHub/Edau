@@ -75,16 +75,8 @@ const AI = () => {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="min-h-screen flex items-center py-16 bg-gradient-to-r from-[#FFF8E1] to-[#81C784]/10 relative">
-          {/* Honeycomb background pattern */}
-          <div className="absolute inset-0 opacity-5">
-            <img
-              src="/honeycomb.svg"
-              alt="Honeycomb pattern"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="container mx-auto px-4 relative z-10">
+        <section className="min-h-screen flex items-center py-6 pt-0 bg-gradient-to-r from-[#FFF8E1] to-[#81C784]/10 relative">
+          <div className="container mx-auto px-4 relative z-10 py-0">
             <div className="text-center mb-12">
               <div className="inline-flex items-center bg-[#4CAF50] text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
                 <Zap className="h-4 w-4 mr-2" />

@@ -40,7 +40,7 @@ const Footer = () => {
   
   return (
     <footer className="bg-gray-50 border-t">
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-6 py-16">
         <div className="flex flex-col md:flex-row justify-between">
           <div className="mb-8 md:mb-0">
             <div className="flex items-center mb-4">
@@ -64,45 +64,45 @@ const Footer = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
             <div>
               <h4 className="font-semibold mb-4 text-gray-800">Products</h4>
-              <ul className="space-y-2">
-                <li><Link to="/products" className="text-gray-600 hover:text-green-600">Edau Honey</Link></li>
-                <li><Link to="/products" className="text-gray-600 hover:text-green-600">Dorper Sheep</Link></li>
-                <li><Link to="/products" className="text-gray-600 hover:text-green-600">Seasonal Fruits</Link></li>
-                <li><Link to="/products" className="text-gray-600 hover:text-green-600">Free-Range Poultry</Link></li>
+              <ul className="space-y-3">
+                <li><Link to="/products" className="text-gray-600 hover:text-green-600 smooth-hover transition-colors">Edau Honey</Link></li>
+                <li><Link to="/products" className="text-gray-600 hover:text-green-600 smooth-hover transition-colors">Dorper Sheep</Link></li>
+                <li><Link to="/products" className="text-gray-600 hover:text-green-600 smooth-hover transition-colors">Seasonal Fruits</Link></li>
+                <li><Link to="/products" className="text-gray-600 hover:text-green-600 smooth-hover transition-colors">Free-Range Poultry</Link></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4 text-gray-800">Farm</h4>
-              <ul className="space-y-2">
-                <li><button onClick={() => scrollToSection("about")} className="text-gray-600 hover:text-green-600 text-left">Our Story</button></li>
-                <li><Link to="/products" className="text-gray-600 hover:text-green-600">Sustainability</Link></li>
-                <li><Link to="/farm-visit" className="text-gray-600 hover:text-green-600">Farm Tours</Link></li>
-                <li><Link to="/products" className="text-gray-600 hover:text-green-600">Farming Tips</Link></li>
+              <ul className="space-y-3">
+                <li><button onClick={() => scrollToSection("about")} className="text-gray-600 hover:text-green-600 text-left smooth-hover transition-colors">Our Story</button></li>
+                <li><Link to="/products" className="text-gray-600 hover:text-green-600 smooth-hover transition-colors">Sustainability</Link></li>
+                <li><Link to="/farm-visit" className="text-gray-600 hover:text-green-600 smooth-hover transition-colors">Farm Tours</Link></li>
+                <li><Link to="/products" className="text-gray-600 hover:text-green-600 smooth-hover transition-colors">Farming Tips</Link></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4 text-gray-800">Contact</h4>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 <li className="flex items-center">
                   <Mail className="h-4 w-4 text-green-600 mr-2" />
-                  <a href="mailto:info@edaufarm.com" className="text-gray-600 hover:text-green-600">info@edaufarm.com</a>
+                  <a href="mailto:info@edaufarm.com" className="text-gray-600 hover:text-green-600 smooth-hover transition-colors">info@edaufarm.com</a>
                 </li>
                 <li className="flex items-center">
                   <Calendar className="h-4 w-4 text-green-600 mr-2" />
-                  <Link to="/farm-visit" className="text-gray-600 hover:text-green-600">Book a Visit</Link>
+                  <Link to="/farm-visit" className="text-gray-600 hover:text-green-600 smooth-hover transition-colors">Book a Visit</Link>
                 </li>
-                <li><button onClick={() => scrollToSection("contact")} className="text-gray-600 hover:text-green-600 text-left">Send Message</button></li>
+                <li><button onClick={() => scrollToSection("contact")} className="text-gray-600 hover:text-green-600 text-left smooth-hover transition-colors">Send Message</button></li>
               </ul>
             </div>
           </div>
         </div>
         
-        <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+        <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <p className="text-gray-600 text-sm mb-4 md:mb-0">
             © {new Date().getFullYear()} Edau Farm. All rights reserved.
           </p>

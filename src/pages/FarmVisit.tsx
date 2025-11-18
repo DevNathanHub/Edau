@@ -1,9 +1,11 @@
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 import FarmVisitBooking from "@/components/FarmVisitBooking";
 import { Helmet } from "react-helmet-async";
 
 const FarmVisit = () => {
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <Helmet>
         <title>Book Farm Visit - Edau Farm | Experience West Pokot Sustainable Farming</title>
         <meta name="description" content="Book a guided farm visit to Edau Farm in West Pokot. Experience Acacia honey production, meet our livestock, and learn about sustainable farming practices." />
@@ -13,8 +15,12 @@ const FarmVisit = () => {
         <meta property="og:url" content="https://edau.loopnet.tech/farm-visit" />
         <link rel="canonical" href="https://edau.loopnet.tech/farm-visit" />
       </Helmet>
-      <FarmVisitBooking />
-    </>
+      <Navigation />
+      <main className="flex-1">
+        <FarmVisitBooking />
+      </main>
+      <Footer />
+    </div>
   );
 };
 

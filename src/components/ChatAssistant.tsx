@@ -918,7 +918,8 @@ const ChatAssistant = () => {
                   !canSendMessage() && input.trim() ? getSendButtonState().tooltip :
                   "Ask about products, orders, visits, or anything farm-related..."
                 }
-                className="min-h-[50px] max-h-[120px] resize-none pr-12 border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-xl shadow-sm"
+                className="min-h-[50px] max-h-[120px] resize-none pr-12 border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-xl shadow-sm text-base"
+                style={{ fontSize: '16px' }}
                 rows={2}
                 disabled={loading}
               />

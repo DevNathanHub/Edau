@@ -312,8 +312,9 @@ const Products = () => {
 
           {/* Search and Filter Section */}
           <div className="bg-white p-4 rounded-lg shadow-sm mb-8">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
+            <div className="flex flex-col gap-4">
+              {/* Search bar - full width */}
+              <div className="relative w-full">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search products..."
@@ -322,9 +323,11 @@ const Products = () => {
                   className="pl-10"
                 />
               </div>
-              <div className="flex flex-col sm:flex-row gap-2">
+              
+              {/* Filters row - responsive grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -337,7 +340,7 @@ const Products = () => {
                 </Select>
 
                 <Select value={priceRange} onValueChange={handlePriceRangeChange}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Price Range" />
                   </SelectTrigger>
                   <SelectContent>
@@ -351,7 +354,7 @@ const Products = () => {
                 </Select>
 
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Sort By" />
                   </SelectTrigger>
                   <SelectContent>
@@ -365,15 +368,16 @@ const Products = () => {
                     <SelectItem value="stock-desc">Stock (High to Low)</SelectItem>
                   </SelectContent>
                 </Select>
+                
+                <Button 
+                  variant="outline" 
+                  onClick={clearFilters} 
+                  className="w-full"
+                  disabled={!searchTerm && !selectedCategory && !priceRange && sortBy === 'name-asc'}
+                >
+                  Clear Filters
+                </Button>
               </div>
-              <Button 
-                variant="outline" 
-                onClick={clearFilters} 
-                className="md:w-auto"
-                disabled={!searchTerm && !selectedCategory && !priceRange && sortBy === 'name-asc'}
-              >
-                Clear Filters
-              </Button>
             </div>
 
             {/* Active filters */}

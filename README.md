@@ -1,6 +1,6 @@
 # 🌾 Edau Farm - West Pokot's Premier Sustainable Farm
 
-Welcome to **Edau Farm**, a family-owned sustainable agricultural enterprise located in the heart of West Pokot, Kenya. We specialize in producing premium Acacia honey, fresh seasonal fruits, premium Dorper sheep, and free-range poultry — all raised with traditional wisdom and modern sustainable practices.
+Welcome to **Edau Farm**, a locally-run sustainable agricultural enterprise located in the heart of West Pokot, Kenya. We specialize in producing premium Acacia honey, fresh seasonal fruits, premium Dorper sheep, and free-range poultry — all raised with traditional wisdom and modern sustainable practices.
 
 ## 🏡 About Edau Farm
 

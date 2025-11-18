@@ -73,7 +73,7 @@ const Index = () => {
       <Navigation />
       <main className="overflow-y-auto">
         {/* Hero Section */}
-        <section id="hero" className="py-16 md:py-24">
+        <section id="hero">
           <Hero />
         </section>
 
@@ -88,19 +88,12 @@ const Index = () => {
         </section>
 
         {/* Statistics Section */}
-        <section id="statistics" className="py-16 md:py-24 bg-gradient-to-br from-amber-900 via-red-900 to-amber-800 text-white relative">
-          {/* Authentic Maasai patterns background */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: '60px 60px'
-            }}></div>
-          </div>
+        <section id="statistics" className="py-16 md:py-24 bg-gradient-to-br from-[#9DBFA6] via-[#56704E] to-[#D69A52] text-white relative">
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16 animate-fade-in-up">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">Our Impact in West Pokot</h2>
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">Our Farm Family Story</h2>
               <p className="text-xl text-amber-100 max-w-2xl mx-auto">
-                Numbers that tell the story of sustainable farming and community growth
+                Real numbers from real people who love what we do
               </p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -128,15 +121,24 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Special Offers Section */}
-        <section id="offers" className="py-16 md:py-24 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 relative">
-          {/* Traditional farm tools pattern */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%238B4513' fill-opacity='0.1'%3E%3Cpath d='M20 20 L60 20 L60 60 L20 60 Z M30 30 L50 30 M40 20 L40 60'/%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: '80px 80px'
-            }}></div>
+        {/* GIF Placeholder Section */}
+        <section id="farm-gif" className="py-16 md:py-24 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+          <div className="container mx-auto px-4 text-center">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-gray-800">Watch Our Farm Come to Life</h2>
+              <div className="bg-gray-200 rounded-2xl h-96 md:h-[500px] flex items-center justify-center shadow-xl">
+                <div className="text-center text-gray-500">
+                  <div className="text-6xl mb-4">🎥</div>
+                  <p className="text-xl font-semibold">Farm Activities GIF Placeholder</p>
+                  <p className="text-sm mt-2">Coming soon: Watch our chickens roam free and bees at work!</p>
+                </div>
+              </div>
+            </div>
           </div>
+        </section>
+
+        {/* Special Offers Section */}
+        <section id="offers" className="py-16 md:py-24 bg-gradient-to-br from-[#FCFBF8] via-[#F2D7A7] to-[#FCFBF8] relative">
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16 animate-fade-in-up">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">Limited Time Harvest Offers</h2>
@@ -210,19 +212,12 @@ const Index = () => {
         </section>
 
         {/* Testimonials Section */}
-        <section id="testimonials" className="py-16 md:py-24 bg-gradient-to-br from-green-900 via-emerald-900 to-green-800 relative">
-          {/* Acacia tree silhouettes */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M50 10 L30 40 L70 40 Z M50 40 L25 70 L75 70 Z M50 70 L20 100 L80 100 Z'/%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: '100px 100px'
-            }}></div>
-          </div>
+        <section id="testimonials" className="py-16 md:py-24 bg-gradient-to-br from-[#56704E] via-[#9DBFA6] to-[#56704E] relative">
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16 animate-fade-in-up">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Voices from Our Community</h2>
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">What Our Happy Customers Say</h2>
               <p className="text-xl text-green-100 max-w-2xl mx-auto">
-                Real stories from families who choose Edau Farm for their authentic, farm-fresh products
+                Hear it straight from the families who love our farm-fresh goodness
               </p>
             </div>
 
@@ -234,8 +229,8 @@ const Index = () => {
                   ))}
                 </div>
                 <p className="text-white mb-6 italic text-lg leading-relaxed">
-                  "The Acacia honey is absolutely incredible! We've been buying from Edau Farm for 2 years now,
-                  and the quality never disappoints. Our kids love the farm visits too!"
+                  "Oh my goodness, that Acacia honey is just incredible! We've been loyal customers for 2 years now,
+                  and it never disappoints. Even our kids can't get enough of those farm visits!"
                 </p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-amber-600 rounded-full flex items-center justify-center text-white font-bold mr-4 text-lg">
@@ -255,8 +250,8 @@ const Index = () => {
                   ))}
                 </div>
                 <p className="text-white mb-6 italic text-lg leading-relaxed">
-                  "Fresh eggs every week and the fruits are always perfectly ripe. The family pack
-                  is perfect for our household of 5. Highly recommend!"
+                  "We get fresh eggs every single week, and the fruits are always perfectly ripe. That family pack
+                  is just right for our busy household of 5. I can't recommend Edau Farm enough!"
                 </p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold mr-4 text-lg">
@@ -294,14 +289,7 @@ const Index = () => {
         </section>
 
         {/* Farm Gallery Section */}
-        <section id="gallery" className="py-16 md:py-24 bg-gradient-to-br from-amber-100 via-yellow-50 to-orange-100 relative">
-          {/* Honeycomb pattern with earth tones */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='52' viewBox='0 0 60 52' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%238B4513' fill-opacity='0.1'%3E%3Cpath d='M30 0 L60 15 L60 37 L30 52 L0 37 L0 15 Z'/%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: '60px 52px'
-            }}></div>
-          </div>
+        <section id="gallery" className="py-16 md:py-24 bg-gradient-to-br from-[#F2D7A7] via-[#FCFBF8] to-[#F2D7A7] relative">
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16 animate-fade-in-up">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">Life at Edau Farm</h2>
@@ -322,7 +310,7 @@ const Index = () => {
 
               <div className="aspect-square rounded-2xl overflow-hidden shadow-xl animate-fade-in-up transform hover:scale-105 transition-all duration-300" style={{ animationDelay: '0.2s' }}>
                 <img 
-                  src="https://res.cloudinary.com/dt05sixza/image/upload/v1761431588/edau_gallery/dfhnrsmuteqhheghiema.jpg"
+                  src="https://res.cloudinary.com/dt05sixza/image/upload/v1761760810/edau_gallery/exarx2mn5qeyfmcgehak.jpg"
                   alt="Edau Farm - Fresh Produce"
                   className="w-full h-full object-cover"
                 />
@@ -338,8 +326,8 @@ const Index = () => {
 
               <div className="aspect-square rounded-2xl overflow-hidden shadow-xl animate-fade-in-up transform hover:scale-105 transition-all duration-300" style={{ animationDelay: '0.4s' }}>
                 <img 
-                  src="https://res.cloudinary.com/dt05sixza/image/upload/v1761432109/edau_gallery/tb0utizepynaszqajuu6.jpg"
-                  alt="Edau Farm - Honey Production"
+                  src="https://res.cloudinary.com/dt05sixza/image/upload/v1763397730/edau_gallery/o9zocxq3sm0z9if5omiw.jpg"
+                  alt="Edau Farm - Fruits Production"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -377,15 +365,24 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Why Choose Us Section */}
-        <section id="why-choose" className="py-16 md:py-24 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 text-white relative">
-          {/* Maasai shield pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='100' viewBox='0 0 80 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M40 10 L60 30 L60 70 L40 90 L20 70 L20 30 Z'/%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: '80px 100px'
-            }}></div>
+        {/* GIF Placeholder Section 2 */}
+        <section id="honey-gif" className="py-16 md:py-24 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+          <div className="container mx-auto px-4 text-center">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-gray-800">See Our Honey Harvest in Action</h2>
+              <div className="bg-gray-200 rounded-2xl h-96 md:h-[500px] flex items-center justify-center shadow-xl">
+                <div className="text-center text-gray-500">
+                  <div className="text-6xl mb-4">🍯</div>
+                  <p className="text-xl font-semibold">Honey Extraction GIF Placeholder</p>
+                  <p className="text-sm mt-2">Coming soon: Witness the magic of turning honeycomb into liquid gold!</p>
+                </div>
+              </div>
+            </div>
           </div>
+        </section>
+
+        {/* Why Choose Us Section */}
+        <section id="why-choose" className="py-16 md:py-24 bg-gradient-to-br from-[#2B2B2B] via-[#56704E] to-[#2B2B2B] text-white relative">
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16 animate-fade-in-up">
               <h2 className="text-4xl md:text-5xl font-bold mb-6">Why Choose Edau Farm?</h2>
@@ -409,7 +406,7 @@ const Index = () => {
                 <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                   <HeartHandshake className="h-10 w-10 text-white" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">Family Owned</h3>
+                <h3 className="text-2xl font-semibold mb-4">Community Driven</h3>
                 <p className="text-gray-300 text-lg leading-relaxed">
                   Three generations of farming expertise in West Pokot, ensuring the highest standards of care and quality.
                 </p>
@@ -428,15 +425,225 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Farm Story Section */}
-        <section id="story" className="py-16 md:py-24 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 relative">
-          {/* Traditional West Pokot patterns */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%238B4513' fill-opacity='0.1'%3E%3Ccircle cx='60' cy='60' r='50' fill='none' stroke='currentColor' stroke-width='2'/%3E%3Ccircle cx='60' cy='60' r='30' fill='none' stroke='currentColor' stroke-width='2'/%3E%3Cpath d='M60 10 L60 110 M10 60 L110 60' stroke='currentColor' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: '120px 120px'
-            }}></div>
+        {/* Sheep Farming Section with Image */}
+        <section id="sheep-farming" className="py-16 md:py-24 bg-gradient-to-br from-[#56704E] to-[#9DBFA6]">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              <div className="md:w-1/2 order-2 md:order-1">
+                <div className="bg-gray-200 rounded-2xl h-80 md:h-[500px] flex items-center justify-center shadow-2xl overflow-hidden">
+                  <div className="text-center text-gray-500">
+                    <div className="text-7xl mb-4">🐑</div>
+                    <p className="text-2xl font-bold">Dorper Sheep Farming</p>
+                    <p className="text-sm mt-3 px-4">Image/GIF Placeholder: Our premium sheep grazing in West Pokot pastures</p>
+                  </div>
+                </div>
+              </div>
+              <div className="md:w-1/2 order-1 md:order-2 text-white">
+                <h2 className="text-4xl md:text-5xl font-bold mb-6">Premium Dorper Sheep</h2>
+                <p className="text-xl mb-4 leading-relaxed">
+                  Our Dorper sheep are raised on the lush pastures of West Pokot, ensuring they receive the best natural diet for superior meat quality.
+                </p>
+                <p className="text-lg mb-6 text-green-100 leading-relaxed">
+                  Free-range grazing, ethical farming practices, and expert care result in tender, flavorful lamb that's perfect for your family meals.
+                </p>
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                    <div className="text-3xl font-bold text-amber-300">50+</div>
+                    <div className="text-green-200">Healthy Sheep</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                    <div className="text-3xl font-bold text-amber-300">100%</div>
+                    <div className="text-green-200">Grass-Fed</div>
+                  </div>
+                </div>
+                <Link to="/products">
+                  <Button size="lg" className="bg-white text-[#56704E] hover:bg-gray-100 shadow-xl transform hover:scale-105 transition-all">
+                    Order Fresh Lamb
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
+        </section>
+
+        {/* Beekeeping Process GIF Section */}
+        <section id="beekeeping-process" className="py-16 md:py-24 bg-gradient-to-br from-[#F2D7A7] via-[#FCFBF8] to-[#D69A52]">
+          <div className="container mx-auto px-4 text-center">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">The Journey from Hive to Jar</h2>
+              <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
+                Watch how we carefully extract pure Acacia honey while maintaining sustainable beekeeping practices
+              </p>
+              <div className="bg-gray-200 rounded-2xl h-96 md:h-[600px] flex items-center justify-center shadow-2xl">
+                <div className="text-center text-gray-500 px-6">
+                  <div className="text-8xl mb-6">🐝</div>
+                  <p className="text-2xl font-bold mb-3">Beekeeping Process Video</p>
+                  <p className="text-base mt-2">Coming soon: Step-by-step honey extraction from our West Pokot hives</p>
+                  <div className="mt-6 flex justify-center gap-4">
+                    <div className="bg-amber-100 px-4 py-2 rounded-lg">
+                      <p className="text-sm text-amber-800">🔍 Hive Inspection</p>
+                    </div>
+                    <div className="bg-amber-100 px-4 py-2 rounded-lg">
+                      <p className="text-sm text-amber-800">🍯 Honey Extraction</p>
+                    </div>
+                    <div className="bg-amber-100 px-4 py-2 rounded-lg">
+                      <p className="text-sm text-amber-800">📦 Bottling Process</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Free-Range Chicken Section */}
+        <section id="poultry" className="py-16 md:py-24 bg-gradient-to-br from-emerald-600 to-green-700 text-white">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              <div className="md:w-1/2">
+                <h2 className="text-4xl md:text-5xl font-bold mb-6">Free-Range Poultry</h2>
+                <p className="text-xl mb-4 leading-relaxed">
+                  Our chickens roam freely across our West Pokot farm, enjoying a natural diet of grains, insects, and fresh vegetation.
+                </p>
+                <p className="text-lg mb-6 text-green-100 leading-relaxed">
+                  This results in eggs with rich, golden yolks and chicken meat that's tender, flavorful, and packed with nutrients.
+                </p>
+                <div className="space-y-4 mb-8">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-6 w-6 text-amber-300 flex-shrink-0 mt-1" />
+                    <div>
+                      <p className="font-semibold text-lg">No Antibiotics or Hormones</p>
+                      <p className="text-green-100">Just natural, healthy birds</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-6 w-6 text-amber-300 flex-shrink-0 mt-1" />
+                    <div>
+                      <p className="font-semibold text-lg">Daily Fresh Eggs</p>
+                      <p className="text-green-100">Collected every morning</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-6 w-6 text-amber-300 flex-shrink-0 mt-1" />
+                    <div>
+                      <p className="font-semibold text-lg">Ethical Farming</p>
+                      <p className="text-green-100">Happy chickens, better food</p>
+                    </div>
+                  </div>
+                </div>
+                <Link to="/products">
+                  <Button size="lg" className="bg-white text-green-700 hover:bg-gray-100 shadow-xl transform hover:scale-105 transition-all">
+                    Order Fresh Eggs & Chicken
+                  </Button>
+                </Link>
+              </div>
+              <div className="md:w-1/2">
+                <div className="bg-gray-200 rounded-2xl h-80 md:h-[500px] flex items-center justify-center shadow-2xl overflow-hidden">
+                  <div className="text-center text-gray-500">
+                    <div className="text-7xl mb-4">🐔</div>
+                    <p className="text-2xl font-bold">Happy Chickens</p>
+                    <p className="text-sm mt-3 px-4">GIF Placeholder: Our chickens roaming freely on the farm</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Seasonal Fruits Carousel */}
+        <section id="fruits" className="py-16 md:py-24 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">Seasonal Orchard Fruits</h2>
+            <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
+              Fresh, tree-ripened fruits harvested at peak flavor from our West Pokot orchards
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-12">
+              <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl p-8 shadow-xl">
+                <div className="text-6xl mb-4">🥭</div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-3">Mangoes</h3>
+                <p className="text-gray-700 mb-4">Sweet, juicy mangoes perfect for smoothies and desserts</p>
+                <div className="bg-white rounded-lg h-48 flex items-center justify-center">
+                  <p className="text-gray-400 text-sm">Image Placeholder</p>
+                </div>
+              </div>
+              <div className="bg-gradient-to-br from-green-100 to-lime-200 rounded-2xl p-8 shadow-xl">
+                <div className="text-6xl mb-4">🍈</div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-3">Melons</h3>
+                <p className="text-gray-700 mb-4">Refreshing watermelons and sweet melons</p>
+                <div className="bg-white rounded-lg h-48 flex items-center justify-center">
+                  <p className="text-gray-400 text-sm">Image Placeholder</p>
+                </div>
+              </div>
+              <div className="bg-gradient-to-br from-red-100 to-pink-200 rounded-2xl p-8 shadow-xl">
+                <div className="text-6xl mb-4">🍎</div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-3">Seasonal Mix</h3>
+                <p className="text-gray-700 mb-4">Various fruits depending on harvest season</p>
+                <div className="bg-white rounded-lg h-48 flex items-center justify-center">
+                  <p className="text-gray-400 text-sm">Image Placeholder</p>
+                </div>
+              </div>
+            </div>
+            <Link to="/products">
+              <Button size="lg" className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-10 py-4 text-xl shadow-xl">
+                Shop Fresh Fruits
+              </Button>
+            </Link>
+          </div>
+        </section>
+
+        {/* Farm-to-Table Timeline */}
+        <section id="farm-to-table" className="py-16 md:py-24 bg-gradient-to-br from-[#2B2B2B] to-[#56704E] text-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">Your Order's Journey</h2>
+              <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                From our farm in West Pokot to your table in under 48 hours
+              </p>
+            </div>
+            <div className="max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+                  <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    🌱
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Day 1: Harvest</h3>
+                  <p className="text-gray-300">Fresh products picked at peak quality</p>
+                </div>
+                <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+                  <div className="w-16 h-16 bg-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    📦
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Day 1: Pack</h3>
+                  <p className="text-gray-300">Carefully packaged with eco-friendly materials</p>
+                </div>
+                <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    🚚
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Day 2: Ship</h3>
+                  <p className="text-gray-300">Express delivery to your location</p>
+                </div>
+                <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+                  <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    🏠
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Day 2: Enjoy</h3>
+                  <p className="text-gray-300">Farm-fresh goodness on your table</p>
+                </div>
+              </div>
+              <div className="mt-12 bg-gray-200 rounded-2xl h-64 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <div className="text-6xl mb-4">🚜➡️🏡</div>
+                  <p className="text-xl font-semibold">Delivery Process Animation</p>
+                  <p className="text-sm mt-2">GIF Placeholder: Animated journey from farm to doorstep</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Farm Story Section */}
+        <section id="story" className="py-16 md:py-24 bg-gradient-to-br from-[#FCFBF8] via-[#F2D7A7] to-[#FCFBF8] relative">
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16 animate-fade-in-up">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">Our West Pokot Story</h2>
@@ -477,7 +684,7 @@ const Index = () => {
                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="flex items-center bg-white/50 rounded-lg p-3">
                     <HeartHandshake className="h-6 w-6 text-red-600 mr-3" />
-                    <span className="text-gray-800 font-semibold">Family Owned</span>
+                    <span className="text-gray-800 font-semibold">Locally Run</span>
                   </div>
                   <div className="flex items-center bg-white/50 rounded-lg p-3">
                     <Calendar className="h-6 w-6 text-amber-600 mr-3" />

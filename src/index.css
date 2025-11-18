@@ -181,6 +181,22 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(76, 175, 80, 0.15);
   }
+
+  .smooth-hover {
+    transition: all 0.2s ease-in-out;
+  }
+
+  .smooth-hover:hover {
+    transform: translateY(-1px);
+  }
+
+  .scale-hover {
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .scale-hover:hover {
+    transform: scale(1.02);
+  }
 }
 
 /* Animated Background Elements */

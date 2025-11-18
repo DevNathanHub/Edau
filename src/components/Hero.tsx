@@ -1,10 +1,11 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Leaf, User, MessageCircle, Zap, ShoppingCart, Phone } from "lucide-react";
+import { ArrowRight, User, MessageCircle, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '@/lib/api';
+import { motion, AnimatePresence } from "framer-motion";
 
 interface GalleryImage {
   id: string;
@@ -129,57 +130,59 @@ const Hero = () => {
   // Per-image skeletons are shown in the image area instead of a global loader.
 
   return (
-    <section className="min-h-screen-mobile md:h-screen flex items-center bg-gradient-to-b from-[#8B4513] via-[#A0522D] to-[#FFF8E1] relative overflow-hidden">
-      {/* Authentic Farm Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Acacia tree silhouettes */}
-        <div className="absolute bottom-0 left-0 w-32 h-48 bg-black/20 transform -scale-x-100" style={{
-          clipPath: 'polygon(20% 100%, 30% 80%, 25% 60%, 35% 40%, 30% 20%, 40% 0%, 60% 0%, 70% 20%, 65% 40%, 75% 60%, 70% 80%, 80% 100%)'
-        }}></div>
-        <div className="absolute bottom-0 right-10 w-28 h-40 bg-black/15" style={{
-          clipPath: 'polygon(20% 100%, 30% 80%, 25% 60%, 35% 40%, 30% 20%, 40% 0%, 60% 0%, 70% 20%, 65% 40%, 75% 60%, 70% 80%, 80% 100%)'
-        }}></div>
-        
-        {/* Maasai shield patterns */}
-        <div className="absolute top-20 left-20 w-16 h-20 border-2 border-amber-600/30 transform rotate-12">
-          <div className="absolute inset-2 border border-amber-600/20"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-amber-600/40 rounded-full"></div>
-        </div>
-        
-        {/* Traditional farm tools silhouettes */}
-        <div className="absolute top-32 right-32 w-12 h-16 bg-black/10 transform rotate-45" style={{
-          clipPath: 'polygon(40% 100%, 60% 100%, 50% 0%)'
-        }}></div>
-        
-        {/* Subtle earth tones gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-900/10 via-transparent to-green-900/10"></div>
-        
-        {/* Floating traditional patterns */}
-        <div className="absolute top-1/4 left-1/4 w-3 h-3 border border-amber-600/30 transform rotate-45 animate-pulse"></div>
-        <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-amber-600/20 rounded-full animate-bounce" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 w-4 h-1 bg-green-600/30 transform -rotate-12 animate-pulse" style={{ animationDelay: '2s' }}></div>
+    <section className="min-h-screen-mobile md:h-screen flex items-center bg-gradient-to-b from-[#FCFBF8] via-[#F2D7A7] to-[#D69A52] relative overflow-hidden">
+      {/* Clean minimal background with subtle patterns */}
+      <div className="absolute inset-0 overflow-hidden opacity-5">
+        <motion.div 
+          className="absolute inset-0"
+          animate={{ 
+            backgroundPosition: ['0% 0%', '100% 100%'],
+          }}
+          transition={{ 
+            duration: 20, 
+            repeat: Infinity, 
+            repeatType: "reverse",
+            ease: "linear"
+          }}
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 50%, rgba(214, 154, 82, 0.1) 0%, transparent 50%),
+                            radial-gradient(circle at 80% 80%, rgba(157, 191, 166, 0.1) 0%, transparent 50%)`,
+            backgroundSize: '100% 100%'
+          }}
+        />
       </div>
 
-  <div className="container mx-auto px-4 relative z-10 py-0">
-        <div className="flex flex-col md:flex-row items-center">
-          <div className="md:w-1/2 md:pr-8 mb-8 md:mb-0">
-            <div className="flex items-center mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-amber-600 to-red-600 rounded-full flex items-center justify-center mr-3">
-                <span className="text-white font-bold text-sm">E</span>
-              </div>
-              <span className="text-amber-800 font-semibold text-lg">Edau Farm - West Pokot</span>
-            </div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 text-white">
+      <div className="container mx-auto px-6 relative z-10 py-0">
+        <div className="flex flex-col md:flex-row items-center gap-12">
+          <motion.div 
+            className="md:w-1/2 md:pr-8 mb-8 md:mb-0"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+          
+            <motion.h1 
+              className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6"
+              style={{ color: '#56704E' }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+            >
               From West Pokot Soil <br />
-              <span className="text-amber-300">to Your Table</span>
-            </h1>
-            <p className="text-base md:text-lg text-white mb-6 leading-relaxed">
-              Experience the authentic flavors of West Pokot through our Acacia honey, heritage-bred livestock,
-              seasonal fruits, and free-range poultry — raised with traditional wisdom and modern care.
-            </p>
+              <span className="text-[#D69A52]">to Your Table</span>
+            </motion.h1>
+            <motion.p 
+              className="text-base md:text-lg mb-8 leading-relaxed text-[#2B2B2B]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
+            >
+              Three generations of Edau family beekeepers and shepherds—bringing golden acacia honey, 
+              pasture-raised lamb, and orchard-fresh fruit straight from our homestead to your kitchen.
+            </motion.p>
             
             {/* Authentic Farm Story Highlight */}
-            <div className="bg-gradient-to-r from-amber-50 to-green-50 border border-amber-200 rounded-xl p-4 md:p-6 mb-6 shadow-lg">
+            <div className="bg-gradient-to-r from-amber-50 to-green-50 border border-amber-200 rounded-xl p-4 md:p-6 mb-6 shadow-lg scale-hover">
               <div className="flex items-center mb-3">
                 <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center mr-3">
                   <User className="h-5 w-5 text-white" />
@@ -197,41 +200,57 @@ const Hero = () => {
               </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-4 md:gap-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.6 }}
+            >
               <Link to="/products">
-                <Button size="lg" className="bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 w-full sm:w-auto">
-                  <ShoppingCart className="mr-2 h-4 md:h-5 w-4 md:w-5" />
-                  Explore Our Products <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
-                </Button>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button size="lg" className="bg-[#D69A52] hover:bg-[#C98B7D] text-white shadow-lg rounded-xl w-full sm:w-auto">
+                    <ShoppingCart className="mr-2 h-4 md:h-5 w-4 md:w-5" />
+                    Shop Honey
+                  </Button>
+                </motion.div>
               </Link>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="border-2 border-amber-600 text-amber-700 hover:bg-amber-50 shadow-md transform hover:scale-105 transition-all duration-200 w-full sm:w-auto"
-                onClick={() => {
-                  const chatButton = document.querySelector('[data-chat-trigger]');
-                  if (chatButton) {
-                    (chatButton as HTMLElement).click();
-                  }
-                }}
-              >
-                <MessageCircle className="mr-2 h-4 md:h-5 w-4 md:w-5" />
-                Ask Our AI Assistant
-              </Button>
-              <Link to="/farm-visit">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="border-2 border-green-600 text-green-700 hover:bg-green-50 shadow-md transform hover:scale-105 transition-all duration-200 w-full sm:w-auto"
+                  className="border-2 border-[#9DBFA6] text-[#56704E] hover:bg-[#9DBFA6]/10 shadow-md rounded-xl w-full sm:w-auto"
+                  onClick={() => {
+                    const chatButton = document.querySelector('[data-chat-trigger]');
+                    if (chatButton) {
+                      (chatButton as HTMLElement).click();
+                    }
+                  }}
                 >
-                  Book Farm Visit
+                  <MessageCircle className="mr-2 h-4 md:h-5 w-4 md:w-5" />
+                  Ask Edau AI
                 </Button>
+              </motion.div>
+              <Link to="/farm-visit">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="border-2 border-[#9DBFA6] text-[#56704E] hover:bg-[#9DBFA6]/10 shadow-md rounded-xl w-full sm:w-auto"
+                  >
+                    Book Farm Visit
+                  </Button>
+                </motion.div>
               </Link>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
-          <div className="md:w-1/2 relative w-full">
-            <div className="relative w-full h-64 md:h-80 lg:h-[500px] overflow-hidden rounded-2xl shadow-2xl border-4 border-white/50 backdrop-blur-sm">
+          <motion.div 
+            className="md:w-1/2 relative w-full"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
+          >
+            <div className="relative w-full h-72 sm:h-80 md:h-80 lg:h-[500px] overflow-hidden rounded-2xl shadow-2xl border-4 border-white/50 backdrop-blur-sm">
               {/* Creative Sliding Images */}
               {(isLoading || galleryImages.length === 0) ? (
                 // Show 3 skeleton slides while loading
@@ -305,10 +324,10 @@ const Hero = () => {
               </div>
 
               {/* Authentic farm overlay text */}
-              <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 bg-gradient-to-r from-amber-900/90 to-red-900/90 backdrop-blur-sm px-2 md:px-4 py-1 md:py-3 rounded-lg border border-amber-600/30">
-                <p className="text-white font-semibold text-xs md:text-sm">West Pokot's Finest</p>
-                <p className="text-amber-100 text-xs">Sustainable farming since 2015</p>
-              </div>
+               <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 bg-gradient-to-r from-amber-900/90 to-red-900/90 backdrop-blur-sm px-2 md:px-4 py-1 md:py-3 rounded-lg border border-amber-600/30">
+                 <p className="text-white font-semibold text-xs md:text-sm">Edau Farm's Finest</p>
+                 <p className="text-amber-100 text-xs">Sustainable farming since 2015</p>
+               </div>
 
               {/* Cultural pattern overlay */}
               <div className="absolute top-2 md:top-4 right-2 md:right-4 w-12 md:w-16 h-12 md:h-16 opacity-20">
@@ -320,7 +339,7 @@ const Hero = () => {
                 </svg>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

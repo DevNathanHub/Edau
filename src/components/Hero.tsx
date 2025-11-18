@@ -32,11 +32,11 @@ const Hero = () => {
         if (response.error) {
           // Fallback to hardcoded images if API fails
           return [
-            { id: '1', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432130/edau_gallery/l391lo21ecais2upig2k.jpg", public_id: "l391lo21ecais2upig2k", original_name: "Farm Landscape", created_at: new Date().toISOString() },
-            { id: '2', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761431588/edau_gallery/dfhnrsmuteqhheghiema.jpg", public_id: "dfhnrsmuteqhheghiema", original_name: "Produce Display", created_at: new Date().toISOString() },
-            { id: '3', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432064/edau_gallery/gzmlkw1evm17yrynuphm.jpg", public_id: "gzmlkw1evm17yrynuphm", original_name: "Animal Husbandry", created_at: new Date().toISOString() },
-            { id: '4', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432109/edau_gallery/tb0utizepynaszqajuu6.jpg", public_id: "tb0utizepynaszqajuu6", original_name: "Honey Production", created_at: new Date().toISOString() },
-            { id: '5', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432088/edau_gallery/q0iexqygkurq4b6xi2wt.jpg", public_id: "q0iexqygkurq4b6xi2wt", original_name: "Community Farming", created_at: new Date().toISOString() }
+            { id: '1', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1763397730/edau_gallery/o9zocxq3sm0z9if5omiw.jpg", public_id: "l391lo21ecais2upig2k", original_name: "Farm Landscape", created_at: new Date().toISOString() },
+            { id: '2', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761557302/edau_gallery/u9shpbxqvgcbfohmzn2c.jpg", public_id: "dfhnrsmuteqhheghiema", original_name: "Produce Display", created_at: new Date().toISOString() },
+            { id: '3', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1763397704/edau_gallery/zupkx8wc4mm4cpt3r1u7.jpg", public_id: "gzmlkw1evm17yrynuphm", original_name: "Animal Husbandry", created_at: new Date().toISOString() },
+            { id: '4', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432064/edau_gallery/gzmlkw1evm17yrynuphm.jpg", public_id: "tb0utizepynaszqajuu6", original_name: "Honey Production", created_at: new Date().toISOString() },
+            { id: '5', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761760810/edau_gallery/exarx2mn5qeyfmcgehak.jpg", public_id: "q0iexqygkurq4b6xi2wt", original_name: "Community Farming", created_at: new Date().toISOString() }
           ];
         }
         // Take up to 8 random images from gallery
@@ -46,11 +46,11 @@ const Hero = () => {
       } catch (error) {
         // Fallback images
         return [
-          { id: '1', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432130/edau_gallery/l391lo21ecais2upig2k.jpg", public_id: "l391lo21ecais2upig2k", original_name: "Farm Landscape", created_at: new Date().toISOString() },
-          { id: '2', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761431588/edau_gallery/dfhnrsmuteqhheghiema.jpg", public_id: "dfhnrsmuteqhheghiema", original_name: "Produce Display", created_at: new Date().toISOString() },
-          { id: '3', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432064/edau_gallery/gzmlkw1evm17yrynuphm.jpg", public_id: "gzmlkw1evm17yrynuphm", original_name: "Animal Husbandry", created_at: new Date().toISOString() },
-          { id: '4', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432109/edau_gallery/tb0utizepynaszqajuu6.jpg", public_id: "tb0utizepynaszqajuu6", original_name: "Honey Production", created_at: new Date().toISOString() },
-          { id: '5', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432088/edau_gallery/q0iexqygkurq4b6xi2wt.jpg", public_id: "q0iexqygkurq4b6xi2wt", original_name: "Community Farming", created_at: new Date().toISOString() }
+            { id: '1', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1763397730/edau_gallery/o9zocxq3sm0z9if5omiw.jpg", public_id: "l391lo21ecais2upig2k", original_name: "Farm Landscape", created_at: new Date().toISOString() },
+            { id: '2', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761557302/edau_gallery/u9shpbxqvgcbfohmzn2c.jpg", public_id: "dfhnrsmuteqhheghiema", original_name: "Produce Display", created_at: new Date().toISOString() },
+            { id: '3', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1763397704/edau_gallery/zupkx8wc4mm4cpt3r1u7.jpg", public_id: "gzmlkw1evm17yrynuphm", original_name: "Animal Husbandry", created_at: new Date().toISOString() },
+            { id: '4', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761432064/edau_gallery/gzmlkw1evm17yrynuphm.jpg", public_id: "tb0utizepynaszqajuu6", original_name: "Honey Production", created_at: new Date().toISOString() },
+            { id: '5', url: "https://res.cloudinary.com/dt05sixza/image/upload/v1761760810/edau_gallery/exarx2mn5qeyfmcgehak.jpg", public_id: "q0iexqygkurq4b6xi2wt", original_name: "Community Farming", created_at: new Date().toISOString() }
         ];
       }
     },

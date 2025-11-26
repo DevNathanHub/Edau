@@ -44,6 +44,10 @@ const OrderManagement: React.FC = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [trackingNumber, setTrackingNumber] = useState<string>("");
   const [deliveryDate, setDeliveryDate] = useState<string>("");
+  const [mpesaPhone, setMpesaPhone] = useState<string>("");
+  const [mpesaTxnId, setMpesaTxnId] = useState<string>("");
+  const [amountPaid, setAmountPaid] = useState<string>("");
+  const [createReceiptChecked, setCreateReceiptChecked] = useState<boolean>(false);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -73,6 +77,10 @@ const OrderManagement: React.FC = () => {
     setStatus(order.status || "pending");
     setTrackingNumber((order as any).tracking_number || "");
     setDeliveryDate((order as any).delivery_date ? new Date((order as any).delivery_date).toISOString().split('T')[0] : "");
+    setMpesaPhone((order as any).mpesa_phone || "");
+    setMpesaTxnId((order as any).mpesa_transaction_id || "");
+    const inferredAmount = (order as any).receipt?.total_paid || (order as any).paid_amount || (order as any).mpesa_claimed_amount || order.total_amount || '';
+    setAmountPaid(inferredAmount ? String(inferredAmount) : "");
     setShowEditDialog(true);
   };
 
@@ -93,12 +101,29 @@ const OrderManagement: React.FC = () => {
     const updateData: any = { status };
     if (trackingNumber) updateData.tracking_number = trackingNumber;
     if (deliveryDate) updateData.delivery_date = new Date(deliveryDate).toISOString();
+    if (mpesaPhone) updateData.mpesa_phone = mpesaPhone;
+    if (mpesaTxnId) updateData.mpesa_transaction_id = mpesaTxnId;
+    if (amountPaid) updateData.paid_amount = Number(amountPaid);
+    // If admin wants to create a receipt now, include createReceipt payload (server supports this)
+    if (createReceiptChecked && status.toLowerCase() === 'paid') {
+      updateData.createReceipt = {
+        transaction_reference: mpesaTxnId || undefined,
+        amount: amountPaid ? Number(amountPaid) : undefined,
+        phone: mpesaPhone || undefined,
+        provider: 'mpesa_manual'
+      };
+    }
+
     const res = await apiService.updateOrder(editOrder.id as string, updateData);
     if (res.error) setError(res.error);
     setShowEditDialog(false);
     setEditOrder(null);
     setTrackingNumber("");
     setDeliveryDate("");
+    setMpesaPhone("");
+    setMpesaTxnId("");
+    setAmountPaid("");
+    setCreateReceiptChecked(false);
     await fetchOrders();
     setLoading(false);
   };
@@ -228,6 +253,42 @@ const OrderManagement: React.FC = () => {
               onChange={(e) => setDeliveryDate(e.target.value)}
             />
           </div>
+          <div className="mb-4">
+            <label className="block mb-1">MPesa Phone (Optional)</label>
+            <input
+              type="text"
+              className="border px-2 py-1 w-full"
+              value={mpesaPhone}
+              onChange={(e) => setMpesaPhone(e.target.value)}
+              placeholder="2547XXXXXXXX or 07XXXXXXXX"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-1">MPesa Transaction ID (Optional)</label>
+            <input
+              type="text"
+              className="border px-2 py-1 w-full"
+              value={mpesaTxnId}
+              onChange={(e) => setMpesaTxnId(e.target.value)}
+              placeholder="Enter MPesa transaction id (e.g. ABC123DEF4)"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-1">Amount Paid (Optional)</label>
+            <input
+              type="number"
+              className="border px-2 py-1 w-full"
+              value={amountPaid}
+              onChange={(e) => setAmountPaid(e.target.value)}
+              placeholder="Enter amount paid"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="inline-flex items-center">
+              <input type="checkbox" className="mr-2" checked={createReceiptChecked} onChange={(e) => setCreateReceiptChecked(e.target.checked)} />
+              <span>Create receipt when marking paid</span>
+            </label>
+          </div>
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline" onClick={() => setShowEditDialog(false)}>
@@ -303,6 +364,24 @@ const OrderManagement: React.FC = () => {
                   <label className="font-semibold">Payment Method:</label>
                   <p>{viewOrder.payment_method || 'N/A'}</p>
                 </div>
+                {(viewOrder as any).mpesa_phone && (
+                  <div>
+                    <label className="font-semibold">MPesa Phone:</label>
+                    <p>{(viewOrder as any).mpesa_phone}</p>
+                  </div>
+                )}
+                {(viewOrder as any).mpesa_transaction_id && (
+                  <div>
+                    <label className="font-semibold">MPesa Transaction ID:</label>
+                    <p>{(viewOrder as any).mpesa_transaction_id}</p>
+                  </div>
+                )}
+                {((viewOrder as any).receipt && (viewOrder as any).receipt.total_paid) && (
+                  <div>
+                    <label className="font-semibold">Total Paid:</label>
+                    <p>KSh {(viewOrder as any).receipt.total_paid}</p>
+                  </div>
+                )}
                 {(viewOrder as any).tracking_number && (
                   <div>
                     <label className="font-semibold">Tracking Number:</label>

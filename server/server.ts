@@ -484,6 +484,64 @@ app.post('/api/orders', async (req: Request, res: Response) => {
   }
 });
 
+// Users submit MPesa transaction ID for an order (delayed/manual processing)
+app.post('/api/orders/:id/mpesa-transaction', verifyToken, async (req: AuthedRequest, res: Response) => {
+  try {
+    if (!db) throw new Error('Database not connected');
+    const { id } = req.params;
+    const { transaction_id, phone, amount } = req.body as any;
+    const userId = req.user?.userId;
+
+    if (!transaction_id || typeof transaction_id !== 'string') return res.status(400).json({ error: 'transaction_id is required' });
+    const tid = transaction_id.trim();
+    if (tid.length < 6 || tid.length > 20) return res.status(400).json({ error: 'transaction_id length looks invalid' });
+
+    let query: any;
+    try { query = { _id: new ObjectId(id) }; } catch { query = { _id: id }; }
+
+    const order = await db!.collection('orders').findOne(query);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+
+    // Ensure only owner or admin can submit (owner or admin via token role)
+    if (order.user_id && userId && order.user_id.toString() !== userId && req.user?.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const update: any = {
+      mpesa_transaction_id: tid,
+      mpesa_transaction_submitted_at: new Date(),
+      mpesa_transaction_submitted_by: userId || null,
+      mpesa_payment_status: 'pending_verification',
+      updated_at: new Date()
+    };
+    if (phone) update.mpesa_phone = phone;
+    if (amount) update.mpesa_claimed_amount = Number(amount) || null;
+
+    await db!.collection('orders').updateOne(query, { $set: update });
+
+    // Optionally record a payment attempt for admin visibility
+    try {
+      await db!.collection('payments').insertOne({
+        order_id: id,
+        provider: 'mpesa_manual_submission',
+        transaction_id: tid,
+        phone: phone || null,
+        amount: amount || null,
+        status: 'submitted',
+        submitted_by: userId || null,
+        created_at: new Date()
+      });
+    } catch (err) {
+      logger.error('Failed to persist manual mpesa submission', err);
+    }
+
+    res.json({ message: 'Transaction submitted, pending admin verification' });
+  } catch (err) {
+    logger.error('MPesa transaction submission error', err);
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });
+  }
+});
+
 // Payments - STK Push integration with Lipia (MPesa)
 // POST /api/payments/stk-push
 app.post('/api/payments/stk-push', async (req: Request, res: Response) => {
@@ -548,6 +606,27 @@ app.post('/api/payments/stk-push', async (req: Request, res: Response) => {
       paymentDoc._id = insert.insertedId;
     } catch (err) {
       logger.error('Failed to persist payment record', err);
+    }
+
+    // If this STK Push was initiated for an order (external_reference), attach mpesa phone and payment attempt id to order
+    if (external_reference) {
+      try {
+        let orderQuery: any;
+        try {
+          orderQuery = { _id: new ObjectId(external_reference) };
+        } catch {
+          orderQuery = { _id: external_reference };
+        }
+        const orderUpdate: any = {
+          mpesa_phone: normalizedPhone,
+          payment_method: 'mpesa_lipia',
+          payment_attempt_id: paymentDoc._id,
+          updated_at: new Date()
+        };
+        await db!.collection('orders').updateOne(orderQuery, { $set: orderUpdate });
+      } catch (err) {
+        logger.error('Failed to attach mpesa phone to order', err);
+      }
     }
 
     if (result && result.success) {
@@ -630,6 +709,7 @@ app.post('/api/payments/lipia/callback', async (req: Request, res: Response) => 
               payment_id: paymentRecord?._id || null,
               transaction_reference: txRef || null,
               amount: amount || paymentRecord?.amount || null,
+              total_paid: amount || paymentRecord?.amount || null,
               phone: phone || paymentRecord?.phone || null,
               provider: 'lipia',
               provider_payload: payload,
@@ -702,6 +782,7 @@ app.patch('/api/admin/orders/:id/status', verifyToken, adminOnly, async (req: Au
         payment_id: null,
         transaction_reference: createReceipt.transaction_reference || null,
         amount: createReceipt.amount || null,
+        total_paid: createReceipt.amount || null,
         phone: createReceipt.phone || null,
         provider: createReceipt.provider || 'manual',
         provider_payload: createReceipt.provider_payload || null,

@@ -32,6 +32,10 @@ const OrderHistory = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const [submittingOrderId, setSubmittingOrderId] = useState<string | null>(null);
+  const [txnId, setTxnId] = useState<string>("");
+  const [txnPhone, setTxnPhone] = useState<string>("");
+  const [txnAmount, setTxnAmount] = useState<string>("");
 
   useEffect(() => {
     if (user) {
@@ -225,9 +229,61 @@ const OrderHistory = () => {
                         View Receipt
                       </Button>
                     </Link>
+                    {user && (
+                      <div className="ml-3">
+                        {order.status !== 'paid' && (
+                          <>
+                            <Button size="sm" className="ml-2" onClick={() => setSubmittingOrderId(submittingOrderId === order.id ? null : order.id)}>
+                              Submit MPesa Transaction
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
+              {/* Inline MPesa submission form */}
+              {submittingOrderId === order.id && (
+                <CardContent className="pt-0 border-t">
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium">MPesa Transaction ID</label>
+                      <input type="text" className="mt-1 block w-full border px-2 py-1" value={txnId} onChange={(e) => setTxnId(e.target.value)} placeholder="Enter transaction id (10 chars)" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium">Phone (optional)</label>
+                      <input type="text" className="mt-1 block w-full border px-2 py-1" value={txnPhone} onChange={(e) => setTxnPhone(e.target.value)} placeholder="2547... or 07..." />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium">Amount (optional)</label>
+                      <input type="number" className="mt-1 block w-full border px-2 py-1" value={txnAmount} onChange={(e) => setTxnAmount(e.target.value)} placeholder="Amount paid" />
+                    </div>
+                    <div className="flex justify-end">
+                      <Button variant="outline" className="mr-2" onClick={() => { setSubmittingOrderId(null); setTxnId(''); setTxnPhone(''); setTxnAmount(''); }}>Cancel</Button>
+                      <Button onClick={async () => {
+                        if (!txnId || txnId.trim().length < 6) {
+                          toast({ title: 'Invalid', description: 'Please enter a valid transaction id', variant: 'destructive' });
+                          return;
+                        }
+                        try {
+                          const payload: any = { transaction_id: txnId.trim() };
+                          if (txnPhone) payload.phone = txnPhone.trim();
+                          if (txnAmount) payload.amount = Number(txnAmount);
+                          const res = await apiService.submitMpesaTransaction(order.id, payload);
+                          if (res.error) throw new Error(res.error);
+                          toast({ title: 'Submitted', description: 'Transaction submitted for verification', variant: 'default' });
+                          setSubmittingOrderId(null);
+                          setTxnId(''); setTxnPhone(''); setTxnAmount('');
+                          loadOrders();
+                        } catch (err) {
+                          toast({ title: 'Error', description: (err as any).message || 'Failed to submit', variant: 'destructive' });
+                        }
+                      }}>Submit</Button>
+                    </div>
+                  </div>
+                </CardContent>
+              )}
             </Card>
           ))}
         </div>

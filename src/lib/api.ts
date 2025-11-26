@@ -140,6 +140,14 @@ class ApiService {
     });
   }
 
+  // Submit MPesa transaction id for an order (user-submitted manual confirmation)
+  async submitMpesaTransaction(orderId: string, payload: { transaction_id: string; phone?: string; amount?: number }) {
+    return this.request(`/api/orders/${orderId}/mpesa-transaction`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
   // Auth
   async login(email: string, password: string) {
     return this.request('/api/auth/login', {

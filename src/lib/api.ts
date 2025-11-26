@@ -148,6 +148,11 @@ class ApiService {
     });
   }
 
+  // Check payment status
+  async checkPaymentStatus(reference: string) {
+    return this.request(`/api/payments/status?reference=${encodeURIComponent(reference)}`);
+  }
+
   // Auth
   async login(email: string, password: string) {
     return this.request('/api/auth/login', {

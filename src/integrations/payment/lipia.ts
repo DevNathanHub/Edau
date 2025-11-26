@@ -22,7 +22,8 @@ export async function initiatePayment(phone: string, amount: number, externalRef
     const body: StkRequestBody = {
       phone_number: formattedPhone,
       amount,
-      external_reference: externalReference
+      external_reference: externalReference,
+      callback_url: 'https://edau.onrender.com/api/payments/lipia/callback'
     };
 
     const resp = await fetch('/api/payments/stk-push', {
@@ -53,28 +54,16 @@ export async function initiatePayment(phone: string, amount: number, externalRef
   }
 }
 
-// Helper function to format phone numbers to the required format (07XXXXXXXX)
+// Helper function to clean phone numbers - let backend do normalization
 function formatPhoneNumber(phone: string): string {
-  // Remove spaces, dashes, and other non-digit characters
-  let cleaned = phone.replace(/\D/g, '');
-
-  // If it already starts with 254 -> convert to 07... form expected by backend
-  if (cleaned.startsWith('254')) {
-    cleaned = '0' + cleaned.substring(3);
-  }
-
-  if (cleaned.length === 10 && (cleaned.startsWith('07') || cleaned.startsWith('01'))) {
-    return cleaned;
-  }
-
-  // Fallback: return original and let backend validate
-  return phone;
+  // Just clean whitespace and basic formatting, let backend normalize to MSISDN
+  return phone.trim().replace(/[\s\-\(\)]/g, '');
 }
 
 export async function checkPaymentStatus(checkoutRequestId: string): Promise<any> {
   // Call backend status endpoint which will query Lipia
   try {
-    const resp = await fetch(`/api/payments/status/${checkoutRequestId}`);
+    const resp = await fetch(`/api/payments/status?reference=${encodeURIComponent(checkoutRequestId)}`);
     const text = await resp.text();
     let data: any = null;
     try {

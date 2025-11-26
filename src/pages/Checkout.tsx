@@ -89,42 +89,64 @@ const Checkout = () => {
   }, [id, user]);
 
   // Function to handle payment status check
-  const checkPayment = async (checkoutRequestId: string, orderId: string) => {
+  const checkPayment = async (transactionRef: string, orderId: string) => {
     setPaymentProcessing(true);
     setPaymentProgress(30);
     
     // Set up a counter to check payment status multiple times
     let checkCount = 0;
-    const maxChecks = 5;
+    const maxChecks = 12; // Check for up to 1 minute (12 * 5s)
     
     const checkInterval = setInterval(async () => {
       try {
         checkCount++;
-        setPaymentProgress(30 + checkCount * 10);
+        setPaymentProgress(30 + (checkCount / maxChecks) * 60);
         
-        const statusResult = await checkPaymentStatus(checkoutRequestId);
+        const statusResult = await apiService.checkPaymentStatus(transactionRef);
         
-        if (statusResult.ResultCode === "0") {
+        // Check if payment is successful (Lipia API returns status in data.response or data.status)
+        const response = statusResult.data?.response || statusResult;
+        const isSuccess = response?.Status === 'SUCCESS' || response?.status === true || (response?.ResultCode === 0 && response?.MpesaReceiptNumber);
+        const isFailed = response?.Status === 'FAILED' || (response?.status === false && response?.ResultCode > 0);
+        
+        if (isSuccess) {
           // Payment successful
           clearInterval(checkInterval);
           setPaymentProgress(100);
+          
+          const amount = cartItems.length > 0 ? cartTotal : (product ? product.price * quantity : 0);
           toast({
             title: "Payment Successful!",
-            description: `Your payment of KSh ${cartTotal.toLocaleString()} has been received.`,
+            description: `Your payment of KSh ${amount.toLocaleString()} has been received.`,
           });
           
           // Update order status in database
           if (orderId && user) {
-            await apiService.updateOrder(orderId, {
-              status: 'delivered',
-              payment_reference: statusResult.MpesaReceiptNumber || ''
-            });
+            try {
+              await apiService.updateOrder(orderId, {
+                status: 'paid',
+                mpesa_receipt_number: response?.MpesaReceiptNumber || '',
+                payment_reference: transactionRef
+              });
+            } catch (updateError) {
+              console.error('Failed to update order status:', updateError);
+            }
           }
           
           // Navigate to receipt page
           clearCart();
           setPaymentProcessing(false);
-          navigate(`/receipt/${id || 'order'}?orderId=${orderId}`);
+          navigate(`/receipt/${orderId || 'order'}`);
+        } else if (isFailed) {
+          // Payment failed
+          clearInterval(checkInterval);
+          setPaymentProcessing(false);
+          setPaymentProgress(0);
+          toast({
+            title: "Payment Failed",
+            description: response?.ResultDesc || "Payment was not completed. Please try again.",
+            variant: "destructive",
+          });
         } else if (checkCount >= maxChecks) {
           // Stop checking after max attempts
           clearInterval(checkInterval);
@@ -141,6 +163,11 @@ const Checkout = () => {
           clearInterval(checkInterval);
           setPaymentProcessing(false);
           setPaymentProgress(0);
+          toast({
+            title: "Status Check Failed",
+            description: "Could not verify payment status. Please check your M-Pesa messages.",
+            variant: "destructive",
+          });
         }
       }
     }, 5000); // Check every 5 seconds
@@ -185,26 +212,30 @@ const Checkout = () => {
             description: "Please complete the payment on your phone.",
           });
           
-          // Save order details in backend if user is logged in
+          // Create order first, then initiate payment with order ID as external_reference
           let orderId = '';
           if (user) {
             try {
-              // Create order record
+              // Create order record first
               const createRes = await apiService.createOrder({
                 user_id: user._id,
                 total_amount: amount,
                 status: 'pending',
-                payment_reference: paymentResult.data.CheckoutRequestID,
+                name: name || undefined,
+                address: address || undefined,
+                phone: phone || undefined,
                 items: cartItems.length > 0 
                   ? cartItems.map(item => ({
                       product_id: item.id,
                       quantity: item.quantity,
                       unit_price: item.price,
+                      product_name: item.name
                     }))
                   : [{
                       product_id: product?.id,
                       quantity: quantity,
                       unit_price: product?.price || 0,
+                      product_name: product?.name || 'Product'
                     }]
               });
               if (createRes.error) throw new Error(createRes.error);

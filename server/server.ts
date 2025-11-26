@@ -553,22 +553,54 @@ app.post('/api/payments/stk-push', async (req: Request, res: Response) => {
     const rawPhone = phone_number || phoneNumber || phone;
     if (!rawPhone) return res.status(400).json({ success: false, status: 'error', message: 'phone_number is required' });
 
-    // Normalize Kenyan phone numbers: 07..., 2547..., +2547... -> 2547...
+    // Normalize Kenyan phone numbers into MSISDN form: 2547XXXXXXXX or 2541XXXXXXXX (12 digits)
     const normalizePhone = (p: string) => {
-      const cleaned = p.toString().trim();
-      if (cleaned.startsWith('+')) return cleaned.replace(/^\+/, '');
-      if (cleaned.startsWith('0')) return '254' + cleaned.slice(1);
-      if (cleaned.startsWith('7') || cleaned.startsWith('1')) return '254' + cleaned;
+      if (!p) return p;
+      // Remove whitespace, dashes, parentheses and plus signs
+      let cleaned = p.toString().trim().replace(/[\s\-()]/g, '');
+      if (cleaned.startsWith('+')) cleaned = cleaned.replace(/^\+/, '');
+      // Remove any non-digit characters
+      cleaned = cleaned.replace(/\D/g, '');
+
+      // If starts with 0 and length 10 -> 07xxxxxxxx or 01xxxxxxxx -> 2547xxxx... or 2541xxxx...
+      if (cleaned.length === 10 && cleaned.startsWith('0')) {
+        return '254' + cleaned.slice(1);
+      }
+      // If starts with 7 and length 9 -> 7xxxxxxxx -> 2547xxxxxxxx
+      if (cleaned.length === 9 && cleaned.startsWith('7')) {
+        return '254' + cleaned;
+      }
+      // If starts with 1 and length 9 -> 1xxxxxxxx -> 2541xxxxxxxx (some numbering)
+      if (cleaned.length === 9 && cleaned.startsWith('1')) {
+        return '254' + cleaned;
+      }
+      // If already starts with country code 254 and correct length (12)
+      if (cleaned.startsWith('254') && cleaned.length === 12) {
+        return cleaned;
+      }
+      // If starts with country code but has leading zeros trimmed, try to normalize
+      if (cleaned.startsWith('254') && cleaned.length === 11) {
+        // unlikely, but return as-is
+        return cleaned;
+      }
+      // Fallback: return cleaned (caller will validate length)
       return cleaned;
     };
 
     const normalizedPhone = normalizePhone(rawPhone);
 
+    // Validate normalized phone: require Kenyan MSISDN 12 digits starting with 254
+    if (!/^[0-9]{12}$/.test(normalizedPhone) || !normalizedPhone.startsWith('254')) {
+      return res.status(400).json({ success: false, status: 'error', message: 'Invalid phone format. Expected Kenyan MSISDN like 2547XXXXXXXX or 2541XXXXXXXX' });
+    }
+
     const amt = parseInt(amount, 10);
     if (!amt || amt <= 0) return res.status(400).json({ success: false, status: 'error', message: 'amount must be a positive integer' });
 
     const payload: any = {
+      // Include both keys for backward compatibility with different provider shapes
       phone_number: normalizedPhone,
+      msisdn: normalizedPhone,
       amount: amt
     };
     if (external_reference) payload.external_reference = external_reference;
@@ -578,16 +610,35 @@ app.post('/api/payments/stk-push', async (req: Request, res: Response) => {
     const LIPIA_API_KEY = process.env.LIPIA_API_KEY;
     if (!LIPIA_API_KEY) return res.status(500).json({ success: false, status: 'error', message: 'Payment provider not configured' });
 
-    const lipiaRes = await fetch('https://lipia-api.kreativelabske.com/api/v2/payments/stk-push', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LIPIA_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
+    // Send the STK push to Lipia and capture the raw response for better diagnostics
+    let lipiaRes;
+    try {
+      logger.info('Sending STK push to Lipia', { url: 'https://lipia-api.kreativelabske.com/api/v2/payments/stk-push', payload });
+      lipiaRes = await fetch('https://lipia-api.kreativelabske.com/api/v2/payments/stk-push', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LIPIA_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      logger.error('Failed to reach Lipia API', err);
+      return res.status(502).json({ success: false, status: 'error', message: 'Failed to reach payment provider' });
+    }
 
-    const result = await lipiaRes.json().catch(() => null);
+    // Read response as text then try to parse JSON (providers sometimes return non-JSON)
+    const lipiaText = await lipiaRes.text().catch(() => '');
+    let result: any = null;
+    try {
+      result = lipiaText ? JSON.parse(lipiaText) : null;
+    } catch (err) {
+      result = { __raw: lipiaText };
+    }
+
+    if (!lipiaRes.ok) {
+      logger.warn('Lipia responded with non-OK status', { status: lipiaRes.status, body: result });
+    }
 
     // Persist payment attempt
     const paymentDoc: any = {
@@ -629,11 +680,24 @@ app.post('/api/payments/stk-push', async (req: Request, res: Response) => {
       }
     }
 
-    if (result && result.success) {
-      return res.json({ success: true, status: 'success', message: 'STK push initiated successfully', data: result.data });
+    if (lipiaRes.ok && result && (result.success === true || result.data)) {
+      return res.json({ success: true, status: 'success', message: 'STK push initiated successfully', data: result.data || result });
     }
 
-    return res.status(400).json({ success: false, status: 'error', message: result?.message || 'Payment initiation failed', error: result?.error || null });
+    // Try to extract provider error details
+    const providerError = result?.error || result?.message || result?.__raw || null;
+    logger.warn('STK push failed', { lipiaStatus: lipiaRes.status, providerError });
+
+    return res.status(400).json({
+      success: false,
+      status: 'error',
+      message: 'M-Pesa STK push failed',
+      error: {
+        code: 'MPESA_ERROR',
+        mpesaError: providerError,
+        originalStatus: lipiaRes.status
+      }
+    });
 
   } catch (error) {
     logger.error('STK Push error', error);
@@ -727,11 +791,46 @@ app.post('/api/payments/lipia/callback', async (req: Request, res: Response) => 
       }
     }
 
-    // Lipia expects 200 OK quickly
-    res.json({ success: true });
+    // Lipia expects a quick plain-text `ok` response
+    res.status(200).type('text/plain').send('ok');
   } catch (error) {
     logger.error('Payment callback handling error', error);
     res.status(500).json({ success: false, message: 'Callback handling failed' });
+  }
+});
+
+// GET /api/payments/status?reference=TRANSACTION_REFERENCE
+app.get('/api/payments/status', async (req: Request, res: Response) => {
+  try {
+    if (!db) throw new Error('Database not connected');
+    const reference = (req.query.reference as string) || (req.query.ref as string) || null;
+    if (!reference) return res.status(400).json({ success: false, status: 'error', message: 'reference query param is required' });
+
+    const LIPIA_API_KEY = process.env.LIPIA_API_KEY;
+    if (!LIPIA_API_KEY) return res.status(500).json({ success: false, status: 'error', message: 'Payment provider not configured' });
+
+    const url = `https://lipia-api.kreativelabske.com/api/v2/payments/status?reference=${encodeURIComponent(reference)}`;
+    let lipiaRes;
+    try {
+      logger.info('Fetching payment status from Lipia', { url });
+      lipiaRes = await fetch(url, { headers: { 'Authorization': `Bearer ${LIPIA_API_KEY}` } });
+    } catch (err) {
+      logger.error('Failed to reach Lipia status API', err);
+      return res.status(502).json({ success: false, status: 'error', message: 'Failed to reach payment provider' });
+    }
+
+    const text = await lipiaRes.text().catch(() => '');
+    let payload: any = null;
+    try { payload = text ? JSON.parse(text) : null; } catch { payload = { __raw: text }; }
+
+    if (!lipiaRes.ok) {
+      return res.status(lipiaRes.status).json({ success: false, status: 'error', message: 'Provider returned error', error: payload });
+    }
+
+    return res.json(payload);
+  } catch (err) {
+    logger.error('Payment status check error', err);
+    return res.status(500).json({ success: false, status: 'error', message: err instanceof Error ? err.message : 'Unknown error' });
   }
 });
 

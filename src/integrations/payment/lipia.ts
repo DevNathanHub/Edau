@@ -31,11 +31,22 @@ export async function initiatePayment(phone: string, amount: number, externalRef
       body: JSON.stringify(body)
     });
 
-    const data = await resp.json();
-    if (!resp.ok) {
-      return { success: false, message: data?.message || 'Payment initiation failed', data };
+    // Read response as text first to avoid JSON.parse errors on empty/non-JSON bodies
+    const text = await resp.text();
+    let data: any = null;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch (parseErr) {
+      // Not JSON — capture raw text for debugging
+      data = { __raw: text };
     }
-    return { success: true, message: data?.message || 'Initiated', data: data?.data || null };
+
+    if (!resp.ok) {
+      const message = data?.message || data?.error || data?.__raw || `HTTP ${resp.status}`;
+      return { success: false, message: String(message), data };
+    }
+
+    return { success: true, message: data?.message || 'Initiated', data: data?.data || data || null };
   } catch (err) {
     console.error('initiatePayment error:', err);
     return { success: false, message: err instanceof Error ? err.message : 'Unknown error' };
@@ -64,11 +75,18 @@ export async function checkPaymentStatus(checkoutRequestId: string): Promise<any
   // Call backend status endpoint which will query Lipia
   try {
     const resp = await fetch(`/api/payments/status/${checkoutRequestId}`);
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error(err?.message || 'Status check failed');
+    const text = await resp.text();
+    let data: any = null;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      data = { __raw: text };
     }
-    return await resp.json();
+
+    if (!resp.ok) {
+      throw new Error(data?.message || data?.error || data?.__raw || `HTTP ${resp.status}`);
+    }
+    return data;
   } catch (err) {
     console.error('checkPaymentStatus error:', err);
     throw err;

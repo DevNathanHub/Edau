@@ -545,13 +545,16 @@ app.post('/api/orders/:id/mpesa-transaction', verifyToken, async (req: AuthedReq
 // Payments - STK Push integration with Lipia (MPesa)
 // POST /api/payments/stk-push
 app.post('/api/payments/stk-push', async (req: Request, res: Response) => {
+  const phone_number = '0741228377';
   try {
     if (!db) throw new Error('Database not connected');
 
-    const { phone_number, phoneNumber, phone, amount, external_reference, callback_url, metadata } = req.body as any;
+    const {  phoneNumber, phone, amount, external_reference, callback_url, metadata } = req.body as any;
 
-    const rawPhone = phone_number || phoneNumber || phone;
+    const rawPhone = phoneNumber || phone;
     if (!rawPhone) return res.status(400).json({ success: false, status: 'error', message: 'phone_number is required' });
+
+    console.log("normalized phone", rawPhone);
 
     // Normalize Kenyan phone numbers into MSISDN form: 2547XXXXXXXX or 2541XXXXXXXX (12 digits)
     const normalizePhone = (p: string) => {
@@ -596,10 +599,10 @@ app.post('/api/payments/stk-push', async (req: Request, res: Response) => {
 
     const amt = parseInt(amount, 10);
     if (!amt || amt <= 0) return res.status(400).json({ success: false, status: 'error', message: 'amount must be a positive integer' });
-
+    console.log("normalized phone", normalizedPhone);
     const payload: any = {
       // Include both keys for backward compatibility with different provider shapes
-      phone_number: normalizedPhone,
+      phone_number,
       msisdn: normalizedPhone,
       amount: amt
     };

@@ -484,6 +484,273 @@ app.post('/api/orders', async (req: Request, res: Response) => {
   }
 });
 
+// Payments - STK Push integration with Lipia (MPesa)
+// POST /api/payments/stk-push
+app.post('/api/payments/stk-push', async (req: Request, res: Response) => {
+  try {
+    if (!db) throw new Error('Database not connected');
+
+    const { phone_number, phoneNumber, phone, amount, external_reference, callback_url, metadata } = req.body as any;
+
+    const rawPhone = phone_number || phoneNumber || phone;
+    if (!rawPhone) return res.status(400).json({ success: false, status: 'error', message: 'phone_number is required' });
+
+    // Normalize Kenyan phone numbers: 07..., 2547..., +2547... -> 2547...
+    const normalizePhone = (p: string) => {
+      const cleaned = p.toString().trim();
+      if (cleaned.startsWith('+')) return cleaned.replace(/^\+/, '');
+      if (cleaned.startsWith('0')) return '254' + cleaned.slice(1);
+      if (cleaned.startsWith('7') || cleaned.startsWith('1')) return '254' + cleaned;
+      return cleaned;
+    };
+
+    const normalizedPhone = normalizePhone(rawPhone);
+
+    const amt = parseInt(amount, 10);
+    if (!amt || amt <= 0) return res.status(400).json({ success: false, status: 'error', message: 'amount must be a positive integer' });
+
+    const payload: any = {
+      phone_number: normalizedPhone,
+      amount: amt
+    };
+    if (external_reference) payload.external_reference = external_reference;
+    if (callback_url) payload.callback_url = callback_url;
+    if (metadata) payload.metadata = metadata;
+
+    const LIPIA_API_KEY = process.env.LIPIA_API_KEY;
+    if (!LIPIA_API_KEY) return res.status(500).json({ success: false, status: 'error', message: 'Payment provider not configured' });
+
+    const lipiaRes = await fetch('https://lipia-api.kreativelabske.com/api/v2/payments/stk-push', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LIPIA_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await lipiaRes.json().catch(() => null);
+
+    // Persist payment attempt
+    const paymentDoc: any = {
+      phone: normalizedPhone,
+      amount: amt,
+      external_reference: external_reference || null,
+      callback_url: callback_url || null,
+      metadata: metadata || null,
+      provider_response: result || null,
+      status: (result && result.success) ? 'initiated' : 'failed',
+      created_at: new Date()
+    };
+
+    try {
+      const insert = await db!.collection('payments').insertOne(paymentDoc);
+      paymentDoc._id = insert.insertedId;
+    } catch (err) {
+      logger.error('Failed to persist payment record', err);
+    }
+
+    if (result && result.success) {
+      return res.json({ success: true, status: 'success', message: 'STK push initiated successfully', data: result.data });
+    }
+
+    return res.status(400).json({ success: false, status: 'error', message: result?.message || 'Payment initiation failed', error: result?.error || null });
+
+  } catch (error) {
+    logger.error('STK Push error', error);
+    return res.status(500).json({ success: false, status: 'error', message: 'Internal server error' });
+  }
+});
+
+// Callback endpoint for Lipia to post payment updates
+// POST /api/payments/lipia/callback
+app.post('/api/payments/lipia/callback', async (req: Request, res: Response) => {
+  try {
+    if (!db) throw new Error('Database not connected');
+
+    const payload = req.body;
+
+    // Save raw callback for auditing
+    const cbDoc = {
+      provider: 'lipia',
+      payload,
+      headers: req.headers,
+      received_at: new Date()
+    } as any;
+
+    await db!.collection('payment_callbacks').insertOne(cbDoc);
+
+    // Determine success from common shapes
+    const txRef = payload?.data?.TransactionReference || payload?.TransactionReference || payload?.data?.transaction_reference || payload?.transaction_reference || null;
+    const extRef = payload?.data?.external_reference || payload?.external_reference || payload?.data?.metadata?.order_id || payload?.data?.metadata?.orderId || null;
+    const responseCode = payload?.data?.ResponseCode ?? payload?.ResponseCode ?? null;
+    const responseDesc = payload?.data?.ResponseDescription ?? payload?.ResponseDescription ?? '';
+    const successFlag = payload?.success === true || (responseCode !== null && Number(responseCode) === 0) || (/success/i).test(responseDesc);
+
+    // Try to correlate payment record
+    const query: any = {};
+    if (txRef) query['provider_response.data.TransactionReference'] = txRef;
+    if (extRef) query['external_reference'] = extRef;
+
+    let paymentRecord: any = null;
+    if (Object.keys(query).length) {
+      try {
+        paymentRecord = await db!.collection('payments').findOne(query);
+        await db!.collection('payments').updateOne(query, { $set: { provider_callback: payload, status: successFlag ? 'completed' : 'failed', updated_at: new Date() } });
+      } catch (err) {
+        logger.error('Failed to update payment record from callback', err);
+      }
+    }
+
+    // If the callback indicates success, attempt to mark the corresponding order as paid and create a receipt
+    if (successFlag) {
+      try {
+        // Determine order id: prefer external_reference / metadata.order_id
+        const orderId = extRef || payload?.data?.metadata?.order_id || payload?.data?.metadata?.orderId || null;
+
+        // Determine amount and phone from payload if available
+        const amount = payload?.data?.Amount || payload?.data?.amount || paymentRecord?.amount || null;
+        const phone = payload?.data?.MSISDN || payload?.data?.phone_number || paymentRecord?.phone || null;
+
+        // If we have an order id, update order status to paid
+        if (orderId) {
+          let orderQuery: any;
+          try {
+            orderQuery = { _id: new ObjectId(orderId) };
+          } catch {
+            orderQuery = { _id: orderId };
+          }
+          const order = await db!.collection('orders').findOne(orderQuery);
+          if (order) {
+            await db!.collection('orders').updateOne(orderQuery, { $set: { status: 'paid', paid_at: new Date(), updated_at: new Date() } });
+
+            // Create receipt
+            const receipt: any = {
+              order_id: orderId,
+              payment_id: paymentRecord?._id || null,
+              transaction_reference: txRef || null,
+              amount: amount || paymentRecord?.amount || null,
+              phone: phone || paymentRecord?.phone || null,
+              provider: 'lipia',
+              provider_payload: payload,
+              created_at: new Date()
+            };
+            const r = await db!.collection('receipts').insertOne(receipt);
+
+            // Link receipt id to order
+            await db!.collection('orders').updateOne(orderQuery, { $set: { receipt_id: r.insertedId, updated_at: new Date() } });
+          }
+        }
+
+      } catch (err) {
+        logger.error('Error handling successful payment callback', err);
+      }
+    }
+
+    // Lipia expects 200 OK quickly
+    res.json({ success: true });
+  } catch (error) {
+    logger.error('Payment callback handling error', error);
+    res.status(500).json({ success: false, message: 'Callback handling failed' });
+  }
+});
+
+// Admin: list all orders (paginated) - admin only
+app.get('/api/admin/orders', verifyToken, adminOnly, async (req: AuthedRequest, res: Response) => {
+  try {
+    if (!db) throw new Error('Database not connected');
+    const { page = '1', limit = '20', status, search } = req.query as any;
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const limitNum = Math.min(200, Math.max(1, parseInt(limit, 10)));
+    const skip = (pageNum - 1) * limitNum;
+
+    const filter: any = {};
+    if (status && status !== 'all') filter.status = status;
+    if (search) filter.$or = [ { name: { $regex: search, $options: 'i' } }, { email: { $regex: search, $options: 'i' } }, { orderId: { $regex: search, $options: 'i' } } ];
+
+    const total = await db!.collection('orders').countDocuments(filter);
+    const orders = await db!.collection('orders').find(filter).sort({ created_at: -1 }).skip(skip).limit(limitNum).toArray();
+
+    res.json({ data: orders.map(serializeDoc), pagination: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) }, message: 'Orders fetched' });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });
+  }
+});
+
+// Admin: update order status and optionally create receipt
+app.patch('/api/admin/orders/:id/status', verifyToken, adminOnly, async (req: AuthedRequest, res: Response) => {
+  try {
+    if (!db) throw new Error('Database not connected');
+    const { id } = req.params;
+    const { status, note, createReceipt } = req.body as any; // createReceipt: { transaction_reference, amount, phone }
+
+    if (!status) return res.status(400).json({ error: 'status is required' });
+
+    let query: any;
+    try { query = { _id: new ObjectId(id) }; } catch { query = { _id: id }; }
+
+    const updates: any = { status, updated_at: new Date() };
+    if (note) updates.note = note;
+
+    const result = await db!.collection('orders').findOneAndUpdate(query, { $set: updates }, { returnDocument: 'after' });
+    if (!result || !result.value) return res.status(404).json({ error: 'Order not found' });
+
+    // If admin marks paid and asked to create receipt
+    if (status.toLowerCase() === 'paid' && createReceipt && typeof createReceipt === 'object') {
+      const receipt = {
+        order_id: id,
+        payment_id: null,
+        transaction_reference: createReceipt.transaction_reference || null,
+        amount: createReceipt.amount || null,
+        phone: createReceipt.phone || null,
+        provider: createReceipt.provider || 'manual',
+        provider_payload: createReceipt.provider_payload || null,
+        created_at: new Date()
+      };
+      const r = await db!.collection('receipts').insertOne(receipt);
+      await db!.collection('orders').updateOne(query, { $set: { receipt_id: r.insertedId, updated_at: new Date() } });
+    }
+
+    res.json({ data: serializeDoc(result.value), message: 'Order status updated' });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });
+  }
+});
+
+// Receipts - admin endpoints
+app.get('/api/receipts', verifyToken, adminOnly, async (req: AuthedRequest, res: Response) => {
+  try {
+    if (!db) throw new Error('Database not connected');
+    const { page = '1', limit = '20', order_id } = req.query as any;
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const limitNum = Math.min(200, Math.max(1, parseInt(limit, 10)));
+    const skip = (pageNum - 1) * limitNum;
+
+    const filter: any = {};
+    if (order_id) filter.order_id = order_id;
+
+    const total = await db!.collection('receipts').countDocuments(filter);
+    const receipts = await db!.collection('receipts').find(filter).sort({ created_at: -1 }).skip(skip).limit(limitNum).toArray();
+    res.json({ data: receipts.map(serializeDoc), pagination: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) }, message: 'Receipts fetched' });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });
+  }
+});
+
+app.get('/api/receipts/:id', verifyToken, adminOnly, async (req: AuthedRequest, res: Response) => {
+  try {
+    if (!db) throw new Error('Database not connected');
+    const { id } = req.params;
+    let query: any;
+    try { query = { _id: new ObjectId(id) }; } catch { query = { _id: id }; }
+    const receipt = await db!.collection('receipts').findOne(query);
+    if (!receipt) return res.status(404).json({ error: 'Receipt not found' });
+    res.json({ data: serializeDoc(receipt), message: 'Receipt fetched' });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });
+  }
+});
+
 // Update order status or fields
 app.patch('/api/orders/:id', async (req: Request, res: Response) => {
   try {

@@ -1,56 +1,44 @@
 
-interface LipiaPaymentResponse {
-  message: string;
-  data?: {
-    amount: string;
-    phone: string;
-    reference: string;
-    CheckoutRequestID: string;
-  };
+interface BackendPaymentResponse {
+  success: boolean;
+  status?: string;
+  message?: string;
+  data?: any;
 }
 
-interface LipiaPaymentRequest {
-  phone: string;
-  amount: string;
+interface StkRequestBody {
+  phone_number: string;
+  amount: number;
+  external_reference?: string;
+  callback_url?: string;
+  metadata?: Record<string, any>;
 }
 
-const LIPIA_API_KEY = "96c2fc4ac0fb65f96bc158c1311fbde6d7ae6001";
-const LIPIA_API_URL = "https://lipia-api.kreativelabske.com/api";
-
-export async function initiatePayment(phone: string, amount: number): Promise<LipiaPaymentResponse> {
+// Initiate payment via our backend API which calls Lipia with the server-side API key.
+export async function initiatePayment(phone: string, amount: number, externalReference?: string): Promise<BackendPaymentResponse> {
   try {
-    // Format phone number to remove country code if present
     const formattedPhone = formatPhoneNumber(phone);
-    
-    // Prepare request body
-    const requestBody: LipiaPaymentRequest = {
-      phone: formattedPhone,
-      amount: amount.toString(),
+
+    const body: StkRequestBody = {
+      phone_number: formattedPhone,
+      amount,
+      external_reference: externalReference
     };
-    
-    // Send payment request
-    const response = await fetch(`${LIPIA_API_URL}/request/stk`, {
+
+    const resp = await fetch('/api/payments/stk-push', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${LIPIA_API_KEY}`
-      },
-      body: JSON.stringify(requestBody),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      return {
-        message: errorData.message || 'Payment request failed'
-      };
+
+    const data = await resp.json();
+    if (!resp.ok) {
+      return { success: false, message: data?.message || 'Payment initiation failed', data };
     }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Payment initiation error:', error);
-    return {
-      message: error instanceof Error ? error.message : 'Unknown payment error'
-    };
+    return { success: true, message: data?.message || 'Initiated', data: data?.data || null };
+  } catch (err) {
+    console.error('initiatePayment error:', err);
+    return { success: false, message: err instanceof Error ? err.message : 'Unknown error' };
   }
 }
 
@@ -58,37 +46,31 @@ export async function initiatePayment(phone: string, amount: number): Promise<Li
 function formatPhoneNumber(phone: string): string {
   // Remove spaces, dashes, and other non-digit characters
   let cleaned = phone.replace(/\D/g, '');
-  
-  // Handle numbers with country code
+
+  // If it already starts with 254 -> convert to 07... form expected by backend
   if (cleaned.startsWith('254')) {
     cleaned = '0' + cleaned.substring(3);
   }
-  
-  // Ensure the number is in the format 07XXXXXXXX
+
   if (cleaned.length === 10 && (cleaned.startsWith('07') || cleaned.startsWith('01'))) {
     return cleaned;
-  } else {
-    throw new Error('Invalid phone number format. Expected format: 07XXXXXXXX');
   }
+
+  // Fallback: return original and let backend validate
+  return phone;
 }
 
 export async function checkPaymentStatus(checkoutRequestId: string): Promise<any> {
+  // Call backend status endpoint which will query Lipia
   try {
-    const response = await fetch(`${LIPIA_API_URL}/status/${checkoutRequestId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${LIPIA_API_KEY}`
-      },
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Payment status check failed');
+    const resp = await fetch(`/api/payments/status/${checkoutRequestId}`);
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err?.message || 'Status check failed');
     }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Payment status check error:', error);
-    throw error;
+    return await resp.json();
+  } catch (err) {
+    console.error('checkPaymentStatus error:', err);
+    throw err;
   }
 }
